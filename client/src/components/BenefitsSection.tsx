@@ -40,7 +40,7 @@ export default function BenefitsSection() {
       <div className="container">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-display text-dreamcap-deep-blue mb-4">
+          <h2 className="text-4xl md:text-5xl text-display text-dreamcap-deep-blue mb-4">
             What Your Family Receives
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
@@ -69,7 +69,7 @@ export default function BenefitsSection() {
 
         {/* Benefit Visualization */}
         <div className="bg-gradient-to-r from-dreamcap-deep-blue/10 to-dreamcap-sky-blue/10 rounded-2xl p-12 border border-dreamcap-sky-blue/20">
-          <h3 className="text-2xl font-display text-dreamcap-deep-blue mb-8 text-center">
+          <h3 className="text-2xl text-display text-dreamcap-deep-blue mb-8 text-center">
             How Your Family Benefits
           </h3>
 

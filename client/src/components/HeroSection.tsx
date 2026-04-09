@@ -16,7 +16,7 @@ export default function HeroSection() {
               <span className="text-sm font-semibold">Trusted by Families</span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display text-dreamcap-deep-blue mb-6 leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl text-display text-dreamcap-deep-blue mb-6 leading-tight">
               Protect Your Family Before It's Too Late
             </h1>
 
@@ -38,15 +38,15 @@ export default function HeroSection() {
             {/* Trust Indicators */}
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-slate-200">
               <div>
-                <p className="text-3xl font-display text-dreamcap-gold font-bold">5M+</p>
+                <p className="text-3xl text-display text-dreamcap-gold font-bold">5M+</p>
                 <p className="text-sm text-slate-600">Families Protected</p>
               </div>
               <div>
-                <p className="text-3xl font-display text-dreamcap-gold font-bold">24hrs</p>
+                <p className="text-3xl text-display text-dreamcap-gold font-bold">24hrs</p>
                 <p className="text-sm text-slate-600">Fast Approval</p>
               </div>
               <div>
-                <p className="text-3xl font-display text-dreamcap-gold font-bold">$0</p>
+                <p className="text-3xl text-display text-dreamcap-gold font-bold">$0</p>
                 <p className="text-sm text-slate-600">Hidden Fees</p>
               </div>
             </div>
@@ -65,7 +65,7 @@ export default function HeroSection() {
             {/* Floating card accent */}
             <div className="absolute -bottom-8 -left-8 bg-white rounded-xl p-6 shadow-xl border border-slate-100 z-20 max-w-xs">
               <p className="text-sm text-slate-600 mb-2">Average Savings</p>
-              <p className="text-3xl font-display text-dreamcap-gold font-bold">$47/month</p>
+              <p className="text-3xl text-display text-dreamcap-gold font-bold">$47/month</p>
               <p className="text-xs text-slate-500 mt-2">vs. industry average</p>
             </div>
           </div>

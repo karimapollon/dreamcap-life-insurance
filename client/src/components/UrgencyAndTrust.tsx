@@ -10,7 +10,7 @@ export default function UrgencyAndTrust() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Urgency Message */}
             <div>
-              <h2 className="text-4xl md:text-5xl font-display mb-6">
+              <h2 className="text-4xl md:text-5xl text-display mb-6">
                 Why Waiting Can Be Expensive
               </h2>
               <p className="text-xl text-blue-100 mb-8 leading-relaxed">
@@ -58,24 +58,24 @@ export default function UrgencyAndTrust() {
 
             {/* Right: Visual Example */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-              <h3 className="text-2xl font-display mb-8 text-center">Premium Example: $250K Coverage</h3>
+              <h3 className="text-2xl text-display mb-8 text-center">Premium Example: $250K Coverage</h3>
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg">
                   <span className="text-blue-100">Age 30, Non-Smoker</span>
-                  <span className="text-2xl font-display text-dreamcap-gold">$18/mo</span>
+                  <span className="text-2xl text-display text-dreamcap-gold">$18/mo</span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg">
                   <span className="text-blue-100">Age 40, Non-Smoker</span>
-                  <span className="text-2xl font-display text-dreamcap-gold">$28/mo</span>
+                  <span className="text-2xl text-display text-dreamcap-gold">$28/mo</span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg">
                   <span className="text-blue-100">Age 50, Non-Smoker</span>
-                  <span className="text-2xl font-display text-dreamcap-gold">$58/mo</span>
+                  <span className="text-2xl text-display text-dreamcap-gold">$58/mo</span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-white/5 rounded-lg border-2 border-dreamcap-gold">
                   <span className="text-blue-100">Age 60, Non-Smoker</span>
-                  <span className="text-2xl font-display text-dreamcap-gold">$128/mo</span>
+                  <span className="text-2xl text-display text-dreamcap-gold">$128/mo</span>
                 </div>
               </div>
 
@@ -91,7 +91,7 @@ export default function UrgencyAndTrust() {
       <section className="py-20 bg-white">
         <div className="container">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display text-dreamcap-deep-blue mb-4">
+            <h2 className="text-4xl md:text-5xl text-display text-dreamcap-deep-blue mb-4">
               Why Families Choose DreamCap
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">

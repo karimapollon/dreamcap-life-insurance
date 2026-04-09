@@ -74,7 +74,7 @@ export default function PremiumCalculator() {
       <div className="container">
         {/* Section Header */}
         <div className="mb-16 text-center">
-          <h2 className="text-4xl md:text-5xl font-display text-dreamcap-deep-blue mb-4">
+          <h2 className="text-4xl md:text-5xl text-display text-dreamcap-deep-blue mb-4">
             See Your Personalized Quote
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
@@ -89,7 +89,7 @@ export default function PremiumCalculator() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
               <div className="flex justify-between items-center mb-4">
                 <label className="text-sm font-semibold text-slate-700">Your Age</label>
-                <span className="text-2xl font-display text-dreamcap-deep-blue">{state.age}</span>
+                <span className="text-2xl text-display text-dreamcap-deep-blue">{state.age}</span>
               </div>
               <Slider
                 value={[state.age]}
@@ -197,7 +197,7 @@ export default function PremiumCalculator() {
               <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
                 <div className="flex justify-between items-center mb-4">
                   <label className="text-sm font-semibold text-slate-700">Term Length</label>
-                  <span className="text-2xl font-display text-dreamcap-deep-blue">{state.term} years</span>
+                  <span className="text-2xl text-display text-dreamcap-deep-blue">{state.term} years</span>
                 </div>
                 <ToggleGroup
                   type="single"
@@ -233,7 +233,7 @@ export default function PremiumCalculator() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
               <div className="flex justify-between items-center mb-4">
                 <label className="text-sm font-semibold text-slate-700">Coverage Amount</label>
-                <span className="text-2xl font-display text-dreamcap-gold">{formatCurrency(state.coverageAmount)}</span>
+                <span className="text-2xl text-display text-dreamcap-gold">{formatCurrency(state.coverageAmount)}</span>
               </div>
               <Slider
                 value={[state.coverageAmount]}
@@ -278,7 +278,7 @@ export default function PremiumCalculator() {
                 {/* Premium Display */}
                 <div className="mb-8">
                   <p className="text-sm font-semibold text-blue-100 mb-2">Your Estimated Monthly Premium</p>
-                  <p className="text-5xl font-display font-bold mb-1">{formatCurrencyDetailed(quote.monthlyPremium)}</p>
+                  <p className="text-5xl text-display font-bold mb-1">{formatCurrencyDetailed(quote.monthlyPremium)}</p>
                   <p className="text-sm text-blue-100">or {formatCurrencyDetailed(quote.annualPremium)}/year</p>
                 </div>
 
@@ -291,7 +291,7 @@ export default function PremiumCalculator() {
                     <Shield className="w-5 h-5 text-blue-200 flex-shrink-0 mt-1" />
                     <div>
                       <p className="font-semibold text-sm mb-1">Your Family Could Receive</p>
-                      <p className="text-2xl font-display font-bold text-blue-100">{formatCurrency(quote.deathBenefit)}</p>
+                      <p className="text-2xl text-display font-bold text-blue-100">{formatCurrency(quote.deathBenefit)}</p>
                       <p className="text-xs text-blue-200 mt-1">Tax-free death benefit</p>
                     </div>
                   </div>

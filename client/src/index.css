@@ -46,82 +46,84 @@
 }
 
 :root {
-  /* DreamCap Brand Colors */
-  --dreamcap-deep-blue: #1B5E9E;
-  --dreamcap-sky-blue: #4A90E2;
-  --dreamcap-gold: #D4A574;
-  --dreamcap-off-white: #F8F9FB;
-  --dreamcap-light-gray: #E8EBF0;
-  --dreamcap-dark-slate: #2C3E50;
+  /* DreamCap Premium Brand Colors */
+  --dreamcap-primary: #1B5E9E;
+  --dreamcap-primary-dark: #0F3A5F;
+  --dreamcap-primary-light: #2B7BC4;
+  --dreamcap-secondary: #4A90E2;
+  --dreamcap-accent: #D4AF37;
+  --dreamcap-accent-light: #E8C547;
+  --dreamcap-neutral-light: #F5F7FA;
+  --dreamcap-neutral-dark: #1A1F2E;
   
   --primary: #1B5E9E;
-  --primary-foreground: #F8F9FB;
+  --primary-foreground: #FFFFFF;
   --sidebar-primary: #1B5E9E;
-  --sidebar-primary-foreground: #F8F9FB;
+  --sidebar-primary-foreground: #FFFFFF;
   --chart-1: #4A90E2;
-  --chart-2: #1B5E9E;
-  --chart-3: #D4A574;
-  --chart-4: #2C3E50;
-  --chart-5: #0F3A5F;
+  --chart-2: #2B7BC4;
+  --chart-3: #1B5E9E;
+  --chart-4: #0F3A5F;
+  --chart-5: #0A2340;
   --radius: 0.65rem;
-  --background: oklch(1 0 0);
-  --foreground: #2C3E50;
-  --card: oklch(1 0 0);
-  --card-foreground: #2C3E50;
-  --popover: oklch(1 0 0);
-  --popover-foreground: #2C3E50;
-  --secondary: #E8EBF0;
-  --secondary-foreground: #2C3E50;
-  --muted: #E8EBF0;
-  --muted-foreground: #7A8FA6;
-  --accent: #D4A574;
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: #E8EBF0;
-  --input: #F8F9FB;
+  --background: #FFFFFF;
+  --foreground: #1A1F2E;
+  --card: #FFFFFF;
+  --card-foreground: #1A1F2E;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1F2E;
+  --secondary: #4A90E2;
+  --secondary-foreground: #FFFFFF;
+  --muted: #F5F7FA;
+  --muted-foreground: #6B7280;
+  --accent: #D4AF37;
+  --accent-foreground: #1A1F2E;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #E5E7EB;
+  --input: #F5F7FA;
   --ring: #4A90E2;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: #2C3E50;
-  --sidebar-accent: #E8EBF0;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1A1F2E;
+  --sidebar-accent: #F5F7FA;
   --sidebar-accent-foreground: #1B5E9E;
-  --sidebar-border: #E8EBF0;
+  --sidebar-border: #E5E7EB;
   --sidebar-ring: #4A90E2;
 }
 
 .dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.85 0.005 65);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.85 0.005 65);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.85 0.005 65);
-  --secondary: oklch(0.24 0.006 286.033);
-  --secondary-foreground: oklch(0.7 0.005 65);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground:  oklch(0.92 0.005 65);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.85 0.005 65);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.488 0.243 264.376);
+  --primary: #1B5E9E;
+  --primary-foreground: #FFFFFF;
+  --sidebar-primary: #4A90E2;
+  --sidebar-primary-foreground: #FFFFFF;
+  --background: #0F1419;
+  --foreground: #F5F7FA;
+  --card: #1A1F2E;
+  --card-foreground: #F5F7FA;
+  --popover: #1A1F2E;
+  --popover-foreground: #F5F7FA;
+  --secondary: #2B7BC4;
+  --secondary-foreground: #FFFFFF;
+  --muted: #2C3E50;
+  --muted-foreground: #A0AEC0;
+  --accent: #D4AF37;
+  --accent-foreground: #0F1419;
+  --destructive: #F87171;
+  --destructive-foreground: #FFFFFF;
+  --border: #2C3E50;
+  --input: #1A1F2E;
+  --ring: #4A90E2;
+  --chart-1: #4A90E2;
+  --chart-2: #2B7BC4;
+  --chart-3: #1B5E9E;
+  --chart-4: #0F3A5F;
+  --chart-5: #0A2340;
+  --sidebar: #1A1F2E;
+  --sidebar-foreground: #F5F7FA;
+  --sidebar-accent: #2C3E50;
+  --sidebar-accent-foreground: #D4AF37;
+  --sidebar-border: #2C3E50;
+  --sidebar-ring: #4A90E2;
 }
 
 @layer base {
@@ -134,15 +136,6 @@
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
-    font-weight: 700;
-  }
-  .font-display {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-  }
-  .font-mono-premium {
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 600;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -155,35 +148,14 @@
   input[type="radio"]:not(:disabled) {
     @apply cursor-pointer;
   }
-  /* Premium button styling */
-  button {
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(27, 94, 158, 0.15);
-  }
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
+    padding-left: 1rem;
     padding-right: 1rem;
   }
 
@@ -194,16 +166,158 @@
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
+      padding-left: 2rem;
       padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      max-width: 1280px;
     }
+  }
+
+  /* Premium Button Styles */
+  .btn-primary {
+    @apply bg-gradient-to-r from-[#1B5E9E] to-[#2B7BC4] text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 active:scale-95;
+    box-shadow: 0 10px 25px -5px rgba(27, 94, 158, 0.3);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 20px 40px -10px rgba(27, 94, 158, 0.4);
+  }
+
+  .btn-secondary {
+    @apply bg-white border-2 border-[#1B5E9E] text-[#1B5E9E] font-semibold py-3 px-6 rounded-lg hover:bg-[#F5F7FA] transition-all duration-300;
+  }
+
+  /* Premium Gradient Backgrounds */
+  .gradient-hero {
+    background: linear-gradient(135deg, #1B5E9E 0%, #2B7BC4 50%, #4A90E2 100%);
+  }
+
+  .gradient-card {
+    background: linear-gradient(135deg, #1B5E9E 0%, #0F3A5F 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, #D4AF37 0%, #E8C547 100%);
+  }
+
+  /* Premium Text Styles */
+  .text-premium {
+    @apply text-3xl md:text-5xl font-bold text-[#1B5E9E];
+  }
+
+  .text-hero {
+    font-family: 'Playfair Display', serif;
+    @apply text-4xl md:text-6xl font-bold text-white;
+  }
+
+  .text-display {
+    font-family: 'Playfair Display', serif;
+    @apply font-bold;
+  }
+
+  /* Animated Number Counter */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in-scale {
+    animation: fadeInScale 0.5s ease-out;
+  }
+
+  @keyframes glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+    }
+  }
+
+  .animate-glow {
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  /* Premium Card Styles */
+  .card-premium {
+    @apply bg-white rounded-lg shadow-lg border border-[#E5E7EB] hover:shadow-xl transition-all duration-300;
+  }
+
+  .card-premium-dark {
+    @apply bg-gradient-to-br from-[#1B5E9E] to-[#0F3A5F] text-white rounded-lg shadow-2xl border-0;
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    @apply w-full bg-[#E5E7EB] rounded-full h-2;
+  }
+
+  .progress-bar-fill {
+    @apply bg-gradient-to-r from-[#1B5E9E] to-[#4A90E2] h-2 rounded-full transition-all duration-500;
+  }
+
+  /* Input Styles */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select {
+    @apply w-full px-4 py-3 rounded-lg border-2 border-[#E5E7EB] focus:border-[#4A90E2] focus:ring-2 focus:ring-[#4A90E2]/20 transition-all duration-300 bg-[#F5F7FA];
+  }
+
+  /* Slider Styles */
+  input[type="range"] {
+    @apply w-full h-2 bg-[#E5E7EB] rounded-lg appearance-none cursor-pointer;
+    background: linear-gradient(to right, #E5E7EB 0%, #E5E7EB 50%, #E5E7EB 100%);
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    @apply appearance-none w-6 h-6 bg-gradient-to-r from-[#1B5E9E] to-[#2B7BC4] rounded-full cursor-pointer shadow-lg hover:shadow-xl transition-all;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    @apply w-6 h-6 bg-gradient-to-r from-[#1B5E9E] to-[#2B7BC4] rounded-full cursor-pointer shadow-lg hover:shadow-xl transition-all border-0;
+  }
+
+  /* Badge Styles */
+  .badge-primary {
+    @apply inline-block bg-[#1B5E9E] text-white px-3 py-1 rounded-full text-sm font-semibold;
+  }
+
+  .badge-accent {
+    @apply inline-block bg-[#D4AF37] text-[#1A1F2E] px-3 py-1 rounded-full text-sm font-semibold;
+  }
+
+  /* Divider */
+  .divider-accent {
+    @apply h-1 bg-gradient-to-r from-[#D4AF37] to-[#E8C547] rounded-full;
   }
 }

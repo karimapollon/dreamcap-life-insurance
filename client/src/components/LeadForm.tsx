@@ -29,7 +29,7 @@ export default function LeadForm() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left: Benefits List */}
           <div>
-            <h2 className="text-4xl md:text-5xl font-display text-dreamcap-deep-blue mb-8">
+            <h2 className="text-4xl md:text-5xl text-display text-dreamcap-deep-blue mb-8">
               Get Your Free Personalized Quote
             </h2>
 
@@ -56,11 +56,11 @@ export default function LeadForm() {
             <div className="mt-12 pt-8 border-t border-slate-200">
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <p className="text-3xl font-display text-dreamcap-gold font-bold">98%</p>
+                  <p className="text-3xl text-display text-dreamcap-gold font-bold">98%</p>
                   <p className="text-sm text-slate-600">Approval Rate</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-display text-dreamcap-gold font-bold">24hrs</p>
+                  <p className="text-3xl text-display text-dreamcap-gold font-bold">24hrs</p>
                   <p className="text-sm text-slate-600">Avg. Decision Time</p>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function LeadForm() {
                 <div className="mb-4 inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full">
                   <CheckCircle className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="text-2xl font-display text-dreamcap-deep-blue mb-2">Thank You!</h3>
+                <h3 className="text-2xl text-display text-dreamcap-deep-blue mb-2">Thank You!</h3>
                 <p className="text-slate-600 mb-4">
                   We've received your information. An advisor will contact you within 24 hours with your personalized quote.
                 </p>

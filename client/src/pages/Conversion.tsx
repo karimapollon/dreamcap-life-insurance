@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CheckCircle, Download } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Lock } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useFunnel } from '@/contexts/FunnelContext';
 import { calculateQuote } from '@/lib/pricingEngine';
@@ -49,68 +49,68 @@ export default function Conversion() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-12 px-4 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#F5F7FA] to-white py-12 px-4 flex items-center justify-center">
         <div className="max-w-2xl mx-auto text-center">
           {/* Success Icon */}
-          <div className="mb-6 inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full">
-            <CheckCircle className="w-12 h-12 text-green-600" />
+          <div className="mb-8 inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full animate-fade-in-scale">
+            <CheckCircle className="w-16 h-16 text-green-600" />
           </div>
 
           {/* Success Message */}
-          <h1 className="text-4xl font-display text-dreamcap-deep-blue mb-4">
+          <h1 className="text-4xl md:text-5xl text-display text-[#1B5E9E] mb-4">
             You're All Set!
           </h1>
-          <p className="text-xl text-slate-600 mb-8">
-            Your personalized quote has been sent to <span className="font-semibold">{data.email}</span>
+          <p className="text-xl text-[#6B7280] mb-10">
+            Your personalized quote has been sent to <span className="font-bold text-[#1B5E9E]">{data.email}</span>
           </p>
 
           {/* What Happens Next */}
-          <Card className="p-8 bg-blue-50 border-2 border-dreamcap-sky-blue mb-8">
-            <h2 className="text-lg font-semibold text-dreamcap-deep-blue mb-4">What Happens Next</h2>
+          <Card className="p-8 bg-blue-50 border-2 border-[#4A90E2] mb-10">
+            <h2 className="text-2xl text-display text-[#1B5E9E] mb-6">What Happens Next</h2>
             <div className="space-y-4 text-left">
               <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-dreamcap-sky-blue text-white rounded-full flex items-center justify-center font-semibold">
+                <div className="flex-shrink-0 w-10 h-10 bg-[#1B5E9E] text-white rounded-full flex items-center justify-center font-bold text-lg">
                   1
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900">Check Your Email</p>
-                  <p className="text-sm text-slate-600">Your detailed quote and options are on their way</p>
+                  <p className="font-bold text-[#1B5E9E]">Check Your Email</p>
+                  <p className="text-sm text-[#6B7280]">Your detailed quote and options are on their way</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-dreamcap-sky-blue text-white rounded-full flex items-center justify-center font-semibold">
+                <div className="flex-shrink-0 w-10 h-10 bg-[#1B5E9E] text-white rounded-full flex items-center justify-center font-bold text-lg">
                   2
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900">Speak with an Advisor</p>
-                  <p className="text-sm text-slate-600">We'll call within 24 hours to answer your questions</p>
+                  <p className="font-bold text-[#1B5E9E]">Speak with an Advisor</p>
+                  <p className="text-sm text-[#6B7280]">We'll call within 24 hours to answer your questions</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-dreamcap-sky-blue text-white rounded-full flex items-center justify-center font-semibold">
+                <div className="flex-shrink-0 w-10 h-10 bg-[#1B5E9E] text-white rounded-full flex items-center justify-center font-bold text-lg">
                   3
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-900">Apply & Get Approved</p>
-                  <p className="text-sm text-slate-600">Fast approval process with no medical exam required</p>
+                  <p className="font-bold text-[#1B5E9E]">Apply & Get Approved</p>
+                  <p className="text-sm text-[#6B7280]">Fast approval process with no medical exam required</p>
                 </div>
               </div>
             </div>
           </Card>
 
           {/* Your Quote Summary */}
-          <Card className="p-6 bg-gradient-to-br from-dreamcap-deep-blue/5 to-dreamcap-sky-blue/5 border-2 border-slate-200 mb-8">
-            <h3 className="font-semibold text-dreamcap-deep-blue mb-4">Your Quote Summary</h3>
-            <div className="grid md:grid-cols-2 gap-6 text-left">
+          <Card className="p-8 bg-gradient-to-br from-[#1B5E9E]/5 to-[#4A90E2]/5 border-2 border-[#E5E7EB] mb-10">
+            <h3 className="font-bold text-lg text-[#1B5E9E] mb-6">Your Quote Summary</h3>
+            <div className="grid md:grid-cols-2 gap-8 text-left">
               <div>
-                <p className="text-sm text-slate-600">Monthly Premium</p>
-                <p className="text-3xl font-display font-bold text-dreamcap-gold">
+                <p className="text-[#6B7280] text-xs font-semibold uppercase mb-2">Monthly Premium</p>
+                <p className="text-5xl text-display font-bold text-[#D4AF37]">
                   {formatCurrency(quote.monthlyPremium)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-slate-600">Coverage Amount</p>
-                <p className="text-3xl font-display font-bold text-dreamcap-deep-blue">
+                <p className="text-[#6B7280] text-xs font-semibold uppercase mb-2">Coverage Amount</p>
+                <p className="text-5xl text-display font-bold text-[#1B5E9E]">
                   {formatCurrency(data.coverageAmount)}
                 </p>
               </div>
@@ -120,7 +120,7 @@ export default function Conversion() {
           {/* CTA */}
           <Button
             onClick={() => setLocation('/')}
-            className="bg-gradient-to-r from-dreamcap-deep-blue to-dreamcap-sky-blue hover:shadow-lg text-white font-semibold py-6 px-8 rounded-lg"
+            className="bg-gradient-to-r from-[#1B5E9E] to-[#2B7BC4] hover:shadow-lg text-white font-semibold py-6 px-10 rounded-lg text-lg"
           >
             Back to Home
           </Button>
@@ -130,87 +130,112 @@ export default function Conversion() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-[#F5F7FA] to-white py-12 px-4">
+      <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-display text-dreamcap-deep-blue mb-2">
-            Get Your Full Personalized Quote
+        <div className="mb-10">
+          <h1 className="text-4xl md:text-5xl text-display text-[#1B5E9E] mb-3">
+            Lock In Your Personalized Plan
           </h1>
-          <p className="text-lg text-slate-600">
-            Just a couple more details and we'll send you everything you need.
+          <p className="text-lg text-[#6B7280]">
+            You're one step away from securing this coverage for your family.
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
+        <div className="mb-10">
           <div className="flex justify-between mb-2">
-            <span className="text-sm font-semibold text-slate-700">Step 3 of 3</span>
+            <span className="text-sm font-semibold text-[#1A1F2E]">Step 3 of 3</span>
           </div>
-          <div className="w-full bg-slate-200 rounded-full h-2">
-            <div className="bg-gradient-to-r from-dreamcap-deep-blue to-dreamcap-sky-blue h-2 rounded-full" style={{ width: '100%' }}></div>
+          <div className="progress-bar">
+            <div className="progress-bar-fill" style={{ width: '100%' }}></div>
           </div>
         </div>
 
-        {/* Value Reinforcement */}
-        <Card className="p-6 bg-gradient-to-r from-dreamcap-gold/10 to-dreamcap-sky-blue/10 border-2 border-dreamcap-sky-blue/30 mb-8">
-          <h3 className="font-semibold text-dreamcap-deep-blue mb-3">What You'll Receive</h3>
-          <ul className="space-y-2 text-sm text-slate-700">
-            <li className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-              <span>Your personalized quote and coverage options</span>
+        {/* Quote Summary Card */}
+        <Card className="p-8 bg-gradient-to-br from-[#1B5E9E]/10 to-[#4A90E2]/10 border-2 border-[#1B5E9E]/30 mb-10">
+          <h3 className="font-bold text-lg text-[#1B5E9E] mb-6">Your Personalized Quote</h3>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <p className="text-[#6B7280] text-xs font-semibold uppercase mb-2">Monthly Cost</p>
+              <p className="text-4xl text-display font-bold text-[#D4AF37]">{formatCurrency(quote.monthlyPremium)}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[#6B7280] text-xs font-semibold uppercase mb-2">Coverage</p>
+              <p className="text-4xl text-display font-bold text-[#1B5E9E]">{formatCurrency(data.coverageAmount)}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[#6B7280] text-xs font-semibold uppercase mb-2">Policy Type</p>
+              <p className="text-lg font-bold text-[#1B5E9E] capitalize">
+                {data.policyType === 'term' ? 'Term' : data.policyType === 'whole' ? 'Whole' : 'Final'}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Value Bullets */}
+        <Card className="p-8 bg-blue-50 border-2 border-[#4A90E2]/30 mb-10">
+          <h3 className="font-bold text-lg text-[#1B5E9E] mb-6">What You'll Receive</h3>
+          <ul className="space-y-3">
+            <li className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <span className="text-[#1A1F2E]">Your personalized quote and coverage options</span>
             </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-              <span>Detailed breakdown of your monthly and annual costs</span>
+            <li className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <span className="text-[#1A1F2E]">Detailed breakdown of your monthly and annual costs</span>
             </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-              <span>Comparison of different policy types</span>
+            <li className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <span className="text-[#1A1F2E]">Comparison of different policy types</span>
             </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-              <span>Direct access to a licensed advisor</span>
+            <li className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <span className="text-[#1A1F2E]">Direct access to a licensed advisor</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <span className="text-[#1A1F2E]">Ability to lock in your current rate</span>
             </li>
           </ul>
         </Card>
 
         {/* Form */}
-        <Card className="p-8 shadow-lg border-0 mb-8">
+        <Card className="p-10 shadow-lg border-0 mb-8 bg-white">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
+              <label className="block text-sm font-bold text-[#1B5E9E] mb-2">Full Name</label>
               <Input
                 type="text"
                 placeholder="John Doe"
                 value={data.name || ''}
                 onChange={(e) => updateData({ name: e.target.value })}
                 required
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-dreamcap-sky-blue focus:ring-2 focus:ring-dreamcap-sky-blue/20"
+                className="w-full px-4 py-3 rounded-lg border-2 border-[#E5E7EB] focus:border-[#4A90E2] focus:ring-2 focus:ring-[#4A90E2]/20"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+              <label className="block text-sm font-bold text-[#1B5E9E] mb-2">Email Address</label>
               <Input
                 type="email"
                 placeholder="john@example.com"
                 value={data.email || ''}
                 onChange={(e) => updateData({ email: e.target.value })}
                 required
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-dreamcap-sky-blue focus:ring-2 focus:ring-dreamcap-sky-blue/20"
+                className="w-full px-4 py-3 rounded-lg border-2 border-[#E5E7EB] focus:border-[#4A90E2] focus:ring-2 focus:ring-[#4A90E2]/20"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Phone Number</label>
+              <label className="block text-sm font-bold text-[#1B5E9E] mb-2">Phone Number</label>
               <Input
                 type="tel"
                 placeholder="(555) 123-4567"
                 value={data.phone || ''}
                 onChange={(e) => updateData({ phone: e.target.value })}
                 required
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:border-dreamcap-sky-blue focus:ring-2 focus:ring-dreamcap-sky-blue/20"
+                className="w-full px-4 py-3 rounded-lg border-2 border-[#E5E7EB] focus:border-[#4A90E2] focus:ring-2 focus:ring-[#4A90E2]/20"
               />
             </div>
 
@@ -218,7 +243,7 @@ export default function Conversion() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-dreamcap-deep-blue to-dreamcap-sky-blue hover:shadow-lg text-white font-semibold py-6 rounded-lg disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-[#1B5E9E] to-[#2B7BC4] hover:shadow-lg text-white font-bold py-7 rounded-lg text-lg disabled:opacity-50 transition-all"
             >
               {isLoading ? (
                 <>
@@ -227,14 +252,14 @@ export default function Conversion() {
                 </>
               ) : (
                 <>
-                  <Download className="w-4 h-4 mr-2" />
-                  Send My Quote
+                  <Lock className="w-5 h-5 mr-2 inline" />
+                  Send My Personalized Plan
                 </>
               )}
             </Button>
 
-            <p className="text-xs text-slate-500 text-center">
-              We respect your privacy. Your information is secure and will never be shared.
+            <p className="text-xs text-[#6B7280] text-center">
+              ✓ Your information is secure and never shared. We respect your privacy.
             </p>
           </form>
         </Card>
@@ -243,7 +268,7 @@ export default function Conversion() {
         <Button
           onClick={handleBack}
           variant="outline"
-          className="w-full py-6 rounded-lg border-2 border-slate-300 text-slate-900 font-semibold"
+          className="w-full py-6 rounded-lg border-2 border-[#1B5E9E] text-[#1B5E9E] font-semibold hover:bg-[#F5F7FA]"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
