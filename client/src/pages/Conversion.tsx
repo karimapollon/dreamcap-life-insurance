@@ -15,7 +15,7 @@ export default function Dashboard() {
     tobacco: data.tobacco,
     coverageAmount: data.coverageAmount,
     policyType: data.policyType || 'term',
-    term: 20,
+    termLength: data.termLength || 20,
   });
 
   const formatCurrency = (value: number) => {

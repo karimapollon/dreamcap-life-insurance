@@ -44,16 +44,18 @@ export default function Dashboard() {
   const { data } = useFunnel();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
+  const termLen = data.termLength || 20;
+
   const quote = calculateQuote({
     age: data.age,
     gender: data.gender || 'male',
     tobacco: data.tobacco,
     coverageAmount: data.coverageAmount,
     policyType: data.policyType || 'term',
-    term: 20,
+    termLength: termLen,
   });
 
-  const policyLabel = data.policyType === 'term' ? '20-Year Term' : data.policyType === 'whole' ? 'Whole Life' : 'Final Expense';
+  const policyLabel = data.policyType === 'term' ? `${termLen}-Year Term` : data.policyType === 'whole' ? 'Whole Life' : 'Final Expense';
 
   // Family impact calculations
   const yearsOfIncome = Math.round(data.coverageAmount / 55000); // avg household income
@@ -148,7 +150,7 @@ export default function Dashboard() {
                     <p className="text-3xl font-bold text-[#1B5E9E]">
                       <AnimatedNumber value={quote.monthlyPremium} prefix="$" decimals={2} />
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Locked rate for your plan</p>
+                    <p className="text-xs text-gray-400 mt-1">Estimated rate for your plan</p>
                   </Card>
                 </motion.div>
 
@@ -476,7 +478,7 @@ export default function Dashboard() {
                         ['Coverage Duration', '10-30 years', 'Lifetime', 'Lifetime'],
                         ['Premium Type', 'Level (fixed)', 'Level (fixed)', 'Level (fixed)'],
                         ['Cash Value', 'No', 'Yes, grows tax-deferred', 'No'],
-                        ['Coverage Range', '$10K - $2M', '$10K - $2M', '$5K - $50K'],
+                        ['Coverage Range', '$100K - $2M', '$25K - $500K', '$5K - $50K'],
                         ['Medical Exam', 'Sometimes', 'Sometimes', 'Usually not required'],
                         ['Best For', 'Young families, mortgages', 'Wealth building, estate', 'Seniors, burial costs'],
                         ['Avg. Monthly Cost', 'Lowest', 'Higher', 'Low-moderate'],
@@ -538,8 +540,15 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
 
+        {/* Estimate Disclaimer */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-gray-400 leading-relaxed max-w-2xl mx-auto">
+            Premiums shown are estimates based on 2026 industry averages and may vary based on health, location, and carrier underwriting. Final rates will be determined upon application review. This is not a guarantee of coverage or pricing.
+          </p>
+        </div>
+
         {/* Sticky Bottom CTA */}
-        <div className="mt-10 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+        <div className="mt-6 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
               <h3 className="text-xl font-bold text-[#1B5E9E]">Ready to Secure Your Family's Future?</h3>

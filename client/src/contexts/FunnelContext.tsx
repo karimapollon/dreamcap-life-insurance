@@ -6,6 +6,7 @@ export interface FunnelData {
   tobacco: boolean;
   coverageAmount: number;
   policyType: 'term' | 'whole' | 'final' | '';
+  termLength: number; // 10, 15, 20, 25, 30 — only relevant for term life
   firstName: string;
   email: string;
   phone: string;
@@ -24,8 +25,9 @@ const defaultData: FunnelData = {
   age: 35,
   gender: '',
   tobacco: false,
-  coverageAmount: 10000,
+  coverageAmount: 250000,
   policyType: '',
+  termLength: 20,
   firstName: '',
   email: '',
   phone: '',

@@ -32,7 +32,7 @@ export default function PremiumCalculator() {
     try {
       return calculateQuote({
         ...state,
-        term: state.term,
+        termLength: state.term,
       });
     } catch (error) {
       return null;

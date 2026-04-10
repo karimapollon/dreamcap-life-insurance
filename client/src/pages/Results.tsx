@@ -12,13 +12,15 @@ export default function Results() {
   const [animatedPremium, setAnimatedPremium] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
 
+  const termLen = data.termLength || 20;
+
   const quote = calculateQuote({
     age: data.age,
     gender: data.gender || 'male',
     tobacco: data.tobacco,
     coverageAmount: data.coverageAmount,
     policyType: data.policyType || 'term',
-    term: 20,
+    termLength: termLen,
   });
 
   // Animate premium number
@@ -130,7 +132,7 @@ export default function Results() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-gray-600">Policy Type</p>
-                <p className="font-semibold text-[#1B5E9E]">{data.policyType === 'term' ? '20-Year Term' : data.policyType === 'whole' ? 'Whole Life' : 'Final Expense'}</p>
+                <p className="font-semibold text-[#1B5E9E]">{data.policyType === 'term' ? `${termLen}-Year Term` : data.policyType === 'whole' ? 'Whole Life' : 'Final Expense'}</p>
               </div>
               <div>
                 <p className="text-gray-600">Coverage Amount</p>
@@ -170,6 +172,9 @@ export default function Results() {
         {/* Trust Message */}
         <p className="text-center text-sm text-white/80 mt-8">
           You're one step closer to protecting your family.
+        </p>
+        <p className="text-center text-xs text-white/50 mt-3 max-w-md mx-auto">
+          Estimates based on 2026 industry averages. Actual rates may vary.
         </p>
       </div>
     </div>

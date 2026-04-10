@@ -1,11 +1,12 @@
 /**
  * DreamCap Life Insurance Pricing Engine
  * 
- * Based on 2026 industry rate data (source: LifeStein.com via NerdWallet, Feb 2026)
- * Uses interpolation between known data points for accurate estimates.
+ * Based on 2026 industry rate data from:
+ * - Ramsey Solutions Term Life Rate Chart (Feb 2026) — $1M coverage base
+ * - ChoiceMutual Whole Life Rate Charts (Mar 2026) — multiple coverage tiers
+ * - ChoiceMutual / MoneyGeek Final Expense Rates (2026) — per $10K coverage
  * 
- * Rate basis: $500,000 coverage, Preferred health class
- * Rates scale linearly with coverage amount relative to $500K base.
+ * All rates are ESTIMATES. Actual premiums vary by health, location, and carrier.
  */
 
 export type PolicyType = 'term' | 'whole' | 'final';
@@ -16,7 +17,7 @@ export interface QuoteInput {
   tobacco: boolean;
   coverageAmount: number;
   policyType: PolicyType;
-  term?: number;
+  termLength?: number; // 10, 15, 20, 25, 30 — only for term life
 }
 
 export interface QuoteResult {
@@ -25,130 +26,132 @@ export interface QuoteResult {
   dailyCost: number;
   deathBenefit: number;
   policyType: PolicyType;
+  termLength?: number;
   explanation: string;
   savingsVsCoffee: number;
   costPerDay: string;
 }
 
-/**
- * Annual rates for $500,000 coverage, Preferred Non-Smoker
- * Source: LifeStein.com / NerdWallet, Feb 2026
- */
-const TERM_20_ANNUAL_NONSMOKER: Record<string, { male: number; female: number }> = {
-  '20': { male: 244, female: 211 },
-  '25': { male: 230, female: 198 },
-  '30': { male: 275, female: 215 },
-  '35': { male: 300, female: 245 },
-  '40': { male: 411, female: 341 },
-  '45': { male: 580, female: 470 },
-  '50': { male: 975, female: 756 },
-  '55': { male: 1500, female: 1150 },
-  '60': { male: 2647, female: 1885 },
-  '65': { male: 5200, female: 3800 },
-  '70': { male: 11015, female: 8940 },
-  '75': { male: 16000, female: 13000 },
-  '80': { male: 22000, female: 18000 },
-  '85': { male: 30000, female: 25000 },
+// ─── Coverage Ranges by Policy Type ─────────────────────────────────────────
+
+export const COVERAGE_RANGES: Record<PolicyType, { min: number; max: number; step: number; defaultVal: number }> = {
+  term:  { min: 100000, max: 2000000, step: 25000, defaultVal: 250000 },
+  whole: { min: 25000,  max: 500000,  step: 5000,  defaultVal: 50000  },
+  final: { min: 5000,   max: 50000,   step: 1000,  defaultVal: 10000  },
 };
 
-/**
- * Annual rates for $500,000 coverage, Smoker Preferred
- */
-const TERM_20_ANNUAL_SMOKER: Record<string, { male: number; female: number }> = {
-  '20': { male: 751, female: 554 },
-  '25': { male: 770, female: 600 },
-  '30': { male: 796, female: 645 },
-  '35': { male: 1100, female: 880 },
-  '40': { male: 1482, female: 1176 },
-  '45': { male: 2400, female: 1800 },
-  '50': { male: 3495, female: 2561 },
-  '55': { male: 5800, female: 4200 },
-  '60': { male: 8454, female: 6800 },
-  '65': { male: 13136, female: 9655 },
-  '70': { male: 20000, female: 16000 },
-  '75': { male: 28000, female: 23000 },
-  '80': { male: 38000, female: 32000 },
-  '85': { male: 50000, female: 42000 },
+export const QUICK_AMOUNTS: Record<PolicyType, number[]> = {
+  term:  [100000, 250000, 500000, 1000000],
+  whole: [25000, 50000, 100000, 250000],
+  final: [5000, 10000, 15000, 25000],
 };
 
-/**
- * Annual rates for $500,000 Whole Life, Non-Smoker
- */
-const WHOLE_ANNUAL_NONSMOKER: Record<string, { male: number; female: number }> = {
-  '20': { male: 2548, female: 2260 },
-  '25': { male: 3100, female: 2780 },
-  '30': { male: 3662, female: 3292 },
-  '35': { male: 4500, female: 4050 },
-  '40': { male: 5524, female: 4967 },
-  '45': { male: 7000, female: 6300 },
-  '50': { male: 8749, female: 7782 },
-  '55': { male: 11500, female: 10100 },
-  '60': { male: 14517, female: 12670 },
-  '65': { male: 19500, female: 17000 },
-  '70': { male: 24797, female: 21766 },
-  '75': { male: 32000, female: 28000 },
-  '80': { male: 42000, female: 37000 },
-  '85': { male: 55000, female: 48000 },
+// ─── Term Length Availability by Age ────────────────────────────────────────
+
+export function getAvailableTermLengths(age: number): number[] {
+  const lengths: number[] = [];
+  if (age <= 80) lengths.push(10);
+  if (age <= 70) lengths.push(15);
+  if (age <= 65) lengths.push(20);
+  if (age <= 60) lengths.push(25);
+  if (age <= 55) lengths.push(30);
+  return lengths;
+}
+
+// ─── TERM LIFE RATES ────────────────────────────────────────────────────────
+// Source: Ramsey Solutions Feb 2026 — Monthly rates for $1M coverage, nonsmoker, "good" health
+// We store monthly rates per $1M and scale proportionally
+
+type RateRow = { male: number; female: number };
+type RateTable = Record<string, RateRow>;
+
+const TERM_MONTHLY_PER_1M: Record<number, RateTable> = {
+  10: {
+    '20': { male: 24.42, female: 19.11 },
+    '30': { male: 27.62, female: 20.04 },
+    '40': { male: 34.79, female: 30.33 },
+    '50': { male: 89.49, female: 73.48 },
+    '60': { male: 234.98, female: 168.70 },
+    '70': { male: 749.45, female: 447.71 },
+    '80': { male: 3384.70, female: 2334.10 },
+  },
+  15: {
+    '20': { male: 28.87, female: 23.20 },
+    '30': { male: 29.74, female: 24.85 },
+    '40': { male: 47.17, female: 39.12 },
+    '50': { male: 113.60, female: 92.50 },
+    '60': { male: 323.67, female: 225.37 },
+    '70': { male: 1082.37, female: 691.23 },
+  },
+  20: {
+    '20': { male: 35.07, female: 27.43 },
+    '30': { male: 39.70, female: 30.41 },
+    '40': { male: 61.68, female: 50.59 },
+    '50': { male: 155.47, female: 114.77 },
+    '60': { male: 443.30, female: 311.26 },
+    '70': { male: 1834.49, female: 1280.08 },
+  },
+  25: {
+    '20': { male: 51.65, female: 36.70 },
+    '30': { male: 52.49, female: 42.47 },
+    '40': { male: 90.47, female: 72.68 },
+    '50': { male: 228.17, female: 163.86 },
+    '60': { male: 797.00, female: 537.02 },
+  },
+  30: {
+    '20': { male: 59.72, female: 42.08 },
+    '30': { male: 63.71, female: 48.87 },
+    '40': { male: 109.28, female: 85.37 },
+    '50': { male: 280.66, female: 206.74 },
+  },
 };
 
-/**
- * Annual rates for $500,000 Whole Life, Smoker
- */
-const WHOLE_ANNUAL_SMOKER: Record<string, { male: number; female: number }> = {
-  '20': { male: 3325, female: 2973 },
-  '25': { male: 4100, female: 3700 },
-  '30': { male: 4923, female: 4492 },
-  '35': { male: 6200, female: 5650 },
-  '40': { male: 7533, female: 6915 },
-  '45': { male: 9800, female: 8900 },
-  '50': { male: 12371, female: 11068 },
-  '55': { male: 16500, female: 14600 },
-  '60': { male: 21107, female: 18427 },
-  '65': { male: 27500, female: 24000 },
-  '70': { male: 34922, female: 31798 },
-  '75': { male: 45000, female: 40000 },
-  '80': { male: 58000, female: 52000 },
-  '85': { male: 72000, female: 65000 },
+// ─── WHOLE LIFE RATES ───────────────────────────────────────────────────────
+// Source: ChoiceMutual Mar 2026 — Monthly rates for $100K coverage, nonsmoker
+// We store monthly rates per $100K and scale proportionally
+
+const WHOLE_MONTHLY_PER_100K: RateTable = {
+  '30': { male: 120, female: 100 },
+  '35': { male: 140, female: 118 },
+  '40': { male: 165, female: 137 },
+  '45': { male: 174, female: 150 },
+  '50': { male: 207, female: 161 },
+  '55': { male: 246, female: 186 },
+  '60': { male: 309, female: 228 },
+  '65': { male: 405, female: 288 },
+  '70': { male: 540, female: 380 },
+  '75': { male: 731, female: 524 },
+  '80': { male: 1029, female: 719 },
+  '85': { male: 1427, female: 1001 },
 };
 
-/**
- * Final Expense rates (per $10,000 coverage, annual)
- * Typically $5K-$50K coverage for seniors
- * Based on industry averages for simplified issue policies
- */
-const FINAL_EXPENSE_ANNUAL_PER_10K: Record<string, { male: number; female: number }> = {
-  '40': { male: 72, female: 60 },
-  '45': { male: 96, female: 78 },
-  '50': { male: 132, female: 108 },
-  '55': { male: 180, female: 150 },
-  '60': { male: 252, female: 210 },
-  '65': { male: 360, female: 300 },
-  '70': { male: 516, female: 432 },
-  '75': { male: 720, female: 600 },
-  '80': { male: 1020, female: 852 },
-  '85': { male: 1440, female: 1200 },
+// ─── FINAL EXPENSE RATES ────────────────────────────────────────────────────
+// Source: ChoiceMutual / MoneyGeek / CNBC 2026 — Monthly rates per $10K coverage, nonsmoker
+
+const FINAL_MONTHLY_PER_10K: RateTable = {
+  '40': { male: 12, female: 11 },
+  '45': { male: 14, female: 13 },
+  '50': { male: 38, female: 30 },
+  '55': { male: 44, female: 35 },
+  '60': { male: 52, female: 42 },
+  '65': { male: 65, female: 52 },
+  '70': { male: 85, female: 68 },
+  '75': { male: 115, female: 92 },
+  '80': { male: 160, female: 125 },
+  '85': { male: 220, female: 175 },
 };
 
-const FINAL_EXPENSE_SMOKER_MULTIPLIER = 1.65;
+// ─── INTERPOLATION ──────────────────────────────────────────────────────────
 
-/**
- * Interpolate between known data points for any age
- */
-function interpolateRate(
-  rateTable: Record<string, { male: number; female: number }>,
-  age: number,
-  gender: 'male' | 'female'
-): number {
-  const ages = Object.keys(rateTable).map(Number).sort((a, b) => a - b);
-  
-  // Clamp age to table range
-  if (age <= ages[0]) return rateTable[String(ages[0])][gender];
-  if (age >= ages[ages.length - 1]) return rateTable[String(ages[ages.length - 1])][gender];
-  
-  // Find surrounding data points
+function interpolateRate(table: RateTable, age: number, gender: 'male' | 'female'): number {
+  const ages = Object.keys(table).map(Number).sort((a, b) => a - b);
+
+  if (age <= ages[0]) return table[String(ages[0])][gender];
+  if (age >= ages[ages.length - 1]) return table[String(ages[ages.length - 1])][gender];
+
   let lowerAge = ages[0];
   let upperAge = ages[ages.length - 1];
-  
+
   for (let i = 0; i < ages.length - 1; i++) {
     if (age >= ages[i] && age <= ages[i + 1]) {
       lowerAge = ages[i];
@@ -156,132 +159,139 @@ function interpolateRate(
       break;
     }
   }
-  
-  const lowerRate = rateTable[String(lowerAge)][gender];
-  const upperRate = rateTable[String(upperAge)][gender];
-  
-  // Linear interpolation
+
+  const lowerRate = table[String(lowerAge)][gender];
+  const upperRate = table[String(upperAge)][gender];
   const fraction = (age - lowerAge) / (upperAge - lowerAge);
+
   return lowerRate + fraction * (upperRate - lowerRate);
 }
 
-/**
- * Calculate annual premium based on inputs
- * All rates are based on $500K coverage and scaled proportionally
- */
-function calculateAnnualPremium(input: QuoteInput): number {
-  const coverageRatio = input.coverageAmount / 500000;
-  let annualRate: number;
+// ─── TOBACCO MULTIPLIER ─────────────────────────────────────────────────────
+
+const TOBACCO_MULTIPLIER: Record<PolicyType, number> = {
+  term: 2.0,
+  whole: 1.45,
+  final: 1.65,
+};
+
+// ─── MAIN CALCULATION ───────────────────────────────────────────────────────
+
+function calculateMonthlyPremium(input: QuoteInput): number {
+  let monthly: number;
 
   if (input.policyType === 'term') {
-    const table = input.tobacco ? TERM_20_ANNUAL_SMOKER : TERM_20_ANNUAL_NONSMOKER;
-    annualRate = interpolateRate(table, input.age, input.gender);
-    annualRate *= coverageRatio;
-  } else if (input.policyType === 'whole') {
-    const table = input.tobacco ? WHOLE_ANNUAL_SMOKER : WHOLE_ANNUAL_NONSMOKER;
-    annualRate = interpolateRate(table, input.age, input.gender);
-    annualRate *= coverageRatio;
-  } else {
-    // Final expense — uses per-$10K rate table
-    // Cap coverage at $50K for final expense
-    const cappedCoverage = Math.min(input.coverageAmount, 50000);
-    const coverageUnits = cappedCoverage / 10000;
-    annualRate = interpolateRate(FINAL_EXPENSE_ANNUAL_PER_10K, input.age, input.gender);
-    annualRate *= coverageUnits;
-    if (input.tobacco) {
-      annualRate *= FINAL_EXPENSE_SMOKER_MULTIPLIER;
+    const termLength = input.termLength || 20;
+    const termTable = TERM_MONTHLY_PER_1M[termLength];
+    if (!termTable) {
+      throw new Error(`Invalid term length: ${termLength}`);
     }
+    // Rate is per $1M, scale to actual coverage
+    const baseRate = interpolateRate(termTable, input.age, input.gender);
+    monthly = baseRate * (input.coverageAmount / 1000000);
+
+  } else if (input.policyType === 'whole') {
+    // Rate is per $100K, scale to actual coverage
+    const baseRate = interpolateRate(WHOLE_MONTHLY_PER_100K, input.age, input.gender);
+    monthly = baseRate * (input.coverageAmount / 100000);
+
+  } else {
+    // Final expense: rate is per $10K, scale to actual coverage
+    const cappedCoverage = Math.min(input.coverageAmount, 50000);
+    const baseRate = interpolateRate(FINAL_MONTHLY_PER_10K, input.age, input.gender);
+    monthly = baseRate * (cappedCoverage / 10000);
   }
 
-  // Add small policy fee ($36-$60/year depending on type)
-  const policyFee = input.policyType === 'final' ? 36 : input.policyType === 'whole' ? 60 : 48;
-  
-  return annualRate + policyFee;
+  // Apply tobacco multiplier
+  if (input.tobacco) {
+    monthly *= TOBACCO_MULTIPLIER[input.policyType];
+  }
+
+  return monthly;
 }
 
-/**
- * Generate explanation of the quote
- */
+// ─── EXPLANATION GENERATOR ──────────────────────────────────────────────────
+
 function generateExplanation(input: QuoteInput, monthlyPremium: number): string {
-  const tobaccoNote = input.tobacco 
-    ? 'As a tobacco user, your rate includes a health adjustment. Quitting could reduce your premium by up to 60%. ' 
+  const tobaccoNote = input.tobacco
+    ? 'As a tobacco user, your rate includes a health adjustment. '
     : '';
-  
+
+  const genderLabel = input.gender === 'male' ? 'man' : 'woman';
+  const coverageStr = `$${input.coverageAmount.toLocaleString()}`;
+
   let policyDesc = '';
   if (input.policyType === 'term') {
-    policyDesc = `This 20-year term policy provides $${input.coverageAmount.toLocaleString()} in tax-free death benefit protection at a locked-in rate.`;
+    const termYears = input.termLength || 20;
+    policyDesc = `This ${termYears}-year term policy provides ${coverageStr} in tax-free death benefit protection at a locked-in rate for the duration of the term.`;
   } else if (input.policyType === 'whole') {
-    policyDesc = `This whole life policy provides $${input.coverageAmount.toLocaleString()} in lifetime coverage with a cash value component that grows tax-deferred.`;
+    policyDesc = `This whole life policy provides ${coverageStr} in lifetime coverage with a cash value component that grows tax-deferred.`;
   } else {
-    policyDesc = `This final expense policy covers funeral costs and immediate expenses up to $${Math.min(input.coverageAmount, 50000).toLocaleString()}.`;
+    const cappedStr = `$${Math.min(input.coverageAmount, 50000).toLocaleString()}`;
+    policyDesc = `This final expense policy covers funeral costs and immediate expenses up to ${cappedStr}.`;
   }
 
-  return `${policyDesc} ${tobaccoNote}Based on 2026 industry rates for a ${input.age}-year-old ${input.gender === 'male' ? 'man' : 'woman'} in preferred health. Rates are guaranteed upon approval.`;
+  return `${policyDesc} ${tobaccoNote}Estimated rate for a ${input.age}-year-old ${genderLabel} based on 2026 industry averages.`;
 }
 
-/**
- * Main quote calculation function
- */
+// ─── PUBLIC API ─────────────────────────────────────────────────────────────
+
 export function calculateQuote(input: QuoteInput): QuoteResult {
   if (input.age < 18 || input.age > 85) {
     throw new Error('Age must be between 18 and 85');
   }
 
-  if (input.coverageAmount < 10000 || input.coverageAmount > 2000000) {
-    throw new Error('Coverage amount must be between $10,000 and $2,000,000');
+  const range = COVERAGE_RANGES[input.policyType];
+  if (input.coverageAmount < range.min || input.coverageAmount > range.max) {
+    throw new Error(`Coverage must be between $${range.min.toLocaleString()} and $${range.max.toLocaleString()} for ${input.policyType} life`);
   }
 
-  const annualPremium = calculateAnnualPremium(input);
-  const monthlyPremium = Math.round((annualPremium / 12) * 100) / 100;
-  const roundedAnnual = Math.round(annualPremium * 100) / 100;
+  const monthlyPremium = Math.round(calculateMonthlyPremium(input) * 100) / 100;
+  const annualPremium = Math.round(monthlyPremium * 12 * 100) / 100;
   const dailyCost = Math.round((annualPremium / 365) * 100) / 100;
-
-  // Compare to daily coffee cost (~$5.50 avg)
   const savingsVsCoffee = Math.round((5.50 - dailyCost) * 100) / 100;
 
   return {
     monthlyPremium,
-    annualPremium: roundedAnnual,
+    annualPremium,
     dailyCost,
     deathBenefit: input.policyType === 'final' ? Math.min(input.coverageAmount, 50000) : input.coverageAmount,
     policyType: input.policyType,
+    termLength: input.policyType === 'term' ? (input.termLength || 20) : undefined,
     explanation: generateExplanation(input, monthlyPremium),
     savingsVsCoffee: Math.max(savingsVsCoffee, 0),
     costPerDay: `$${dailyCost.toFixed(2)}`,
   };
 }
 
-/**
- * Get premium range for educational display
- */
 export function getPremiumRange(
   age: number,
   policyType: PolicyType,
-  coverageAmount: number = 250000
+  coverageAmount?: number
 ): { min: number; max: number } {
+  const range = COVERAGE_RANGES[policyType];
+  const coverage = coverageAmount || range.defaultVal;
+
   const minInput: QuoteInput = {
     age,
     gender: 'female',
     tobacco: false,
-    coverageAmount,
+    coverageAmount: coverage,
     policyType,
-    term: 20,
+    termLength: policyType === 'term' ? 20 : undefined,
   };
 
   const maxInput: QuoteInput = {
     age,
     gender: 'male',
     tobacco: true,
-    coverageAmount,
+    coverageAmount: coverage,
     policyType,
-    term: 20,
+    termLength: policyType === 'term' ? 20 : undefined,
   };
 
   const minQuote = calculateQuote(minInput);
   const maxQuote = calculateQuote(maxInput);
 
-  return {
-    min: minQuote.monthlyPremium,
-    max: maxQuote.monthlyPremium,
-  };
+  return { min: minQuote.monthlyPremium, max: maxQuote.monthlyPremium };
 }
