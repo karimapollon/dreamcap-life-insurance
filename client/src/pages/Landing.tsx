@@ -13,7 +13,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen gradient-hero flex items-center justify-center px-4 py-12 relative overflow-hidden">
+    <div className="gradient-hero flex items-center justify-center px-4 py-16 relative overflow-hidden" style={{ minHeight: 'calc(100vh - 64px)' }}>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-20 right-10 w-72 h-72 bg-[#D4AF37]/5 rounded-full blur-3xl"></div>

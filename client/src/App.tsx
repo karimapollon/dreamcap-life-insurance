@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { FunnelProvider } from "./contexts/FunnelContext";
+import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import Estimate from "./pages/Estimate";
 import Results from "./pages/Results";
@@ -15,17 +16,19 @@ import Dashboard from "./pages/Dashboard";
 
 function Router() {
   return (
-    <Switch>
-      <Route path={"/"} component={Landing} />
-      <Route path={"/estimate"} component={Estimate} />
-      <Route path={"/results"} component={Results} />
-      <Route path={"/lead-capture"} component={LeadCapture} />
-      <Route path={"/success"} component={Success} />
-      <Route path={"/dashboard"} component={Dashboard} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <Layout>
+      <Switch>
+        <Route path={"/"} component={Landing} />
+        <Route path={"/estimate"} component={Estimate} />
+        <Route path={"/results"} component={Results} />
+        <Route path={"/lead-capture"} component={LeadCapture} />
+        <Route path={"/success"} component={Success} />
+        <Route path={"/dashboard"} component={Dashboard} />
+        <Route path={"/404"} component={NotFound} />
+        {/* Final fallback route */}
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
 
