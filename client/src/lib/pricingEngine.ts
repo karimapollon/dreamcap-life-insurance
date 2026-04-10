@@ -32,6 +32,13 @@ export interface QuoteResult {
   costPerDay: string;
 }
 
+export interface PolicyRecommendation {
+  policyType: PolicyType;
+  termLength?: number;
+  coverageAmount: number;
+  reasoning: string;
+}
+
 // ─── Coverage Ranges by Policy Type ─────────────────────────────────────────
 
 export const COVERAGE_RANGES: Record<PolicyType, { min: number; max: number; step: number; defaultVal: number }> = {
@@ -56,6 +63,66 @@ export function getAvailableTermLengths(age: number): number[] {
   if (age <= 60) lengths.push(25);
   if (age <= 55) lengths.push(30);
   return lengths;
+}
+
+// ─── SMART POLICY RECOMMENDATION ───────────────────────────────────────────
+// Recommends the best policy type based on age and tobacco use
+
+export function recommendPolicy(age: number, tobacco: boolean): PolicyRecommendation {
+  // Under 50: Term life is almost always the best value
+  // Provides the most coverage for the lowest cost
+  if (age < 50) {
+    const termLength = age <= 35 ? 30 : age <= 45 ? 20 : 15;
+    const coverageAmount = tobacco ? 250000 : 500000;
+    return {
+      policyType: 'term',
+      termLength,
+      coverageAmount,
+      reasoning: `At age ${age}, term life insurance gives you the most coverage at the lowest cost. A ${termLength}-year term will protect your family during your peak earning years when they depend on your income the most.`,
+    };
+  }
+
+  // 50–59: Term life still works well, but whole life becomes attractive
+  // Tobacco users may benefit from whole life since term rates spike with tobacco
+  if (age < 60) {
+    if (tobacco) {
+      return {
+        policyType: 'whole',
+        coverageAmount: 100000,
+        reasoning: `At age ${age} with tobacco use, whole life insurance provides lifetime coverage with a guaranteed rate. Term rates increase significantly for tobacco users at this age, making whole life a more stable long-term option.`,
+      };
+    }
+    const termLength = age <= 55 ? 20 : 15;
+    return {
+      policyType: 'term',
+      termLength,
+      coverageAmount: 250000,
+      reasoning: `At age ${age}, a ${termLength}-year term policy still offers excellent value. It will cover you through retirement age when your financial obligations typically decrease.`,
+    };
+  }
+
+  // 60–69: Whole life or final expense depending on needs
+  if (age < 70) {
+    if (tobacco) {
+      return {
+        policyType: 'final',
+        coverageAmount: 25000,
+        reasoning: `At age ${age} with tobacco use, a final expense policy is the most practical option. It ensures your family isn't burdened with funeral costs ($7,000–$12,000 avg) and end-of-life expenses, with no medical exam typically required.`,
+      };
+    }
+    return {
+      policyType: 'whole',
+      coverageAmount: 50000,
+      reasoning: `At age ${age}, whole life insurance provides lifetime coverage that won't expire. It's ideal for leaving a legacy, covering final expenses, and ensuring your family has financial support no matter when you pass.`,
+    };
+  }
+
+  // 70+: Final expense is typically the most practical and affordable
+  return {
+    policyType: 'final',
+    coverageAmount: tobacco ? 10000 : 15000,
+    reasoning: `At age ${age}, a final expense policy is the most practical and affordable option. It covers funeral, burial, and immediate end-of-life costs so your family isn't left with unexpected expenses. No medical exam is usually required.`,
+  };
 }
 
 // ─── TERM LIFE RATES ────────────────────────────────────────────────────────

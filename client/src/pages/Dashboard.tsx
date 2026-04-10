@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Shield, TrendingUp, Heart, Users, Home, GraduationCap,
   DollarSign, Clock, CheckCircle, ArrowRight, ChevronDown,
-  Wallet, PiggyBank, Umbrella, Lock, Phone, Calendar
+  Wallet, PiggyBank, Umbrella, Lock, Phone, Calendar,
+  FileText, User, MapPin, Stethoscope, Pill, UserPlus, Save, AlertCircle
 } from 'lucide-react';
 import { useFunnel } from '@/contexts/FunnelContext';
 import { calculateQuote } from '@/lib/pricingEngine';
@@ -43,6 +44,40 @@ function AnimatedNumber({ value, prefix = '', suffix = '', decimals = 0 }: {
 export default function Dashboard() {
   const { data } = useFunnel();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [appSaved, setAppSaved] = useState(false);
+  const [appForm, setAppForm] = useState({
+    fullName: data.firstName || '',
+    dateOfBirth: '',
+    ssn: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    occupation: '',
+    annualIncome: '',
+    heightFt: '',
+    heightIn: '',
+    weight: '',
+    primaryBeneficiary: '',
+    beneficiaryRelationship: '',
+    contingentBeneficiary: '',
+    medicalConditions: '',
+    medications: '',
+    familyHistory: '',
+    hasBeenHospitalized: '',
+    hasDUI: '',
+    additionalNotes: '',
+  });
+
+  const updateAppForm = useCallback((field: string, value: string) => {
+    setAppForm(prev => ({ ...prev, [field]: value }));
+    setAppSaved(false);
+  }, []);
+
+  const handleSaveApplication = useCallback(() => {
+    setAppSaved(true);
+    setTimeout(() => setAppSaved(false), 3000);
+  }, []);
 
   const termLen = data.termLength || 20;
 
@@ -119,7 +154,7 @@ export default function Dashboard() {
       {/* Dashboard Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 mb-8 bg-white shadow-sm rounded-xl p-1 h-auto">
+          <TabsList className="w-full grid grid-cols-5 mb-8 bg-white shadow-sm rounded-xl p-1 h-auto">
             <TabsTrigger value="overview" className="py-3 text-sm font-semibold data-[state=active]:bg-[#1B5E9E] data-[state=active]:text-white rounded-lg">
               Plan Overview
             </TabsTrigger>
@@ -131,6 +166,9 @@ export default function Dashboard() {
             </TabsTrigger>
             <TabsTrigger value="details" className="py-3 text-sm font-semibold data-[state=active]:bg-[#1B5E9E] data-[state=active]:text-white rounded-lg">
               Coverage Details
+            </TabsTrigger>
+            <TabsTrigger value="apply" className="py-3 text-sm font-semibold data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1B5E9E] rounded-lg">
+              Continue Application
             </TabsTrigger>
           </TabsList>
 
@@ -536,6 +574,333 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Card>
+            </div>
+          </TabsContent>
+          {/* ===== TAB 5: CONTINUE APPLICATION ===== */}
+          <TabsContent value="apply">
+            <div className="space-y-6">
+              {/* Intro Card */}
+              <Card className="p-6 bg-gradient-to-r from-[#FFF8E1] to-[#FFF3CD] border-0 shadow-sm border-l-4 border-l-[#D4AF37]">
+                <div className="flex items-start gap-4">
+                  <FileText className="w-8 h-8 text-[#D4AF37] flex-shrink-0" />
+                  <div>
+                    <h3 className="text-lg font-bold text-[#1B5E9E] mb-1">Continue Your Application</h3>
+                    <p className="text-sm text-gray-700">
+                      Providing additional details helps us match you with the best carrier and speeds up your approval. 
+                      <strong className="text-[#1B5E9E]"> All fields below are optional</strong> — fill in as much or as little as you'd like. 
+                      Your advisor can help complete the rest during your consultation.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Personal Information */}
+              <Card className="p-6 bg-white border-0 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <User className="w-5 h-5 text-[#1B5E9E]" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#1B5E9E]">Personal Information</h3>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Legal Name</label>
+                    <input
+                      type="text"
+                      value={appForm.fullName}
+                      onChange={(e) => updateAppForm('fullName', e.target.value)}
+                      placeholder="As it appears on your ID"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                    <input
+                      type="date"
+                      value={appForm.dateOfBirth}
+                      onChange={(e) => updateAppForm('dateOfBirth', e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Social Security Number</label>
+                    <input
+                      type="password"
+                      value={appForm.ssn}
+                      onChange={(e) => updateAppForm('ssn', e.target.value)}
+                      placeholder="XXX-XX-XXXX"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                    <p className="text-xs text-gray-400 mt-1 flex items-center gap-1"><Lock className="w-3 h-3" /> Encrypted & secure — required for underwriting</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+                    <input
+                      type="text"
+                      value={appForm.occupation}
+                      onChange={(e) => updateAppForm('occupation', e.target.value)}
+                      placeholder="Your current job title"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Annual Household Income</label>
+                    <input
+                      type="text"
+                      value={appForm.annualIncome}
+                      onChange={(e) => updateAppForm('annualIncome', e.target.value)}
+                      placeholder="$75,000"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Address */}
+              <Card className="p-6 bg-white border-0 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#1B5E9E]">Address</h3>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                    <input
+                      type="text"
+                      value={appForm.address}
+                      onChange={(e) => updateAppForm('address', e.target.value)}
+                      placeholder="123 Main Street, Apt 4B"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input
+                      type="text"
+                      value={appForm.city}
+                      onChange={(e) => updateAppForm('city', e.target.value)}
+                      placeholder="City"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                      <input
+                        type="text"
+                        value={appForm.state}
+                        onChange={(e) => updateAppForm('state', e.target.value)}
+                        placeholder="FL"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                      <input
+                        type="text"
+                        value={appForm.zip}
+                        onChange={(e) => updateAppForm('zip', e.target.value)}
+                        placeholder="33101"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Health Information */}
+              <Card className="p-6 bg-white border-0 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+                    <Stethoscope className="w-5 h-5 text-red-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#1B5E9E]">Health Information</h3>
+                </div>
+                <div className="grid md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Height (ft)</label>
+                    <input
+                      type="number"
+                      value={appForm.heightFt}
+                      onChange={(e) => updateAppForm('heightFt', e.target.value)}
+                      placeholder="5"
+                      min="3" max="8"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Height (in)</label>
+                    <input
+                      type="number"
+                      value={appForm.heightIn}
+                      onChange={(e) => updateAppForm('heightIn', e.target.value)}
+                      placeholder="10"
+                      min="0" max="11"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Weight (lbs)</label>
+                    <input
+                      type="number"
+                      value={appForm.weight}
+                      onChange={(e) => updateAppForm('weight', e.target.value)}
+                      placeholder="170"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Existing Medical Conditions</label>
+                    <textarea
+                      value={appForm.medicalConditions}
+                      onChange={(e) => updateAppForm('medicalConditions', e.target.value)}
+                      placeholder="List any diagnosed conditions (e.g., diabetes, high blood pressure, heart disease, asthma). Enter 'None' if not applicable."
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Current Medications</label>
+                    <textarea
+                      value={appForm.medications}
+                      onChange={(e) => updateAppForm('medications', e.target.value)}
+                      placeholder="List any prescription medications you currently take. Enter 'None' if not applicable."
+                      rows={2}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Family Medical History</label>
+                    <textarea
+                      value={appForm.familyHistory}
+                      onChange={(e) => updateAppForm('familyHistory', e.target.value)}
+                      placeholder="Any history of heart disease, cancer, stroke, or diabetes in immediate family? Enter 'None' if not applicable."
+                      rows={2}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm resize-none"
+                    />
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Hospitalized in the last 5 years?</label>
+                      <select
+                        value={appForm.hasBeenHospitalized}
+                        onChange={(e) => updateAppForm('hasBeenHospitalized', e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm bg-white"
+                      >
+                        <option value="">Select...</option>
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">DUI/DWI in the last 5 years?</label>
+                      <select
+                        value={appForm.hasDUI}
+                        onChange={(e) => updateAppForm('hasDUI', e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm bg-white"
+                      >
+                        <option value="">Select...</option>
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Beneficiary Information */}
+              <Card className="p-6 bg-white border-0 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                    <UserPlus className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#1B5E9E]">Beneficiary Information</h3>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Primary Beneficiary</label>
+                    <input
+                      type="text"
+                      value={appForm.primaryBeneficiary}
+                      onChange={(e) => updateAppForm('primaryBeneficiary', e.target.value)}
+                      placeholder="Full name of primary beneficiary"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                    <select
+                      value={appForm.beneficiaryRelationship}
+                      onChange={(e) => updateAppForm('beneficiaryRelationship', e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm bg-white"
+                    >
+                      <option value="">Select relationship...</option>
+                      <option value="spouse">Spouse</option>
+                      <option value="child">Child</option>
+                      <option value="parent">Parent</option>
+                      <option value="sibling">Sibling</option>
+                      <option value="trust">Trust</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contingent Beneficiary (Optional)</label>
+                    <input
+                      type="text"
+                      value={appForm.contingentBeneficiary}
+                      onChange={(e) => updateAppForm('contingentBeneficiary', e.target.value)}
+                      placeholder="Full name of contingent (backup) beneficiary"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm"
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Additional Notes */}
+              <Card className="p-6 bg-white border-0 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-[#D4AF37]" />
+                  </div>
+                  <h3 className="text-lg font-bold text-[#1B5E9E]">Additional Notes</h3>
+                </div>
+                <textarea
+                  value={appForm.additionalNotes}
+                  onChange={(e) => updateAppForm('additionalNotes', e.target.value)}
+                  placeholder="Anything else you'd like your advisor to know? (e.g., existing policies, specific concerns, preferred contact times)"
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-[#1B5E9E] focus:ring-2 focus:ring-[#1B5E9E]/20 outline-none text-sm resize-none"
+                />
+              </Card>
+
+              {/* Save Button */}
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  onClick={handleSaveApplication}
+                  className="w-full md:w-auto bg-gradient-to-r from-[#D4AF37] to-[#F4C430] text-[#1B5E9E] hover:shadow-lg font-bold py-4 px-8 rounded-xl text-base transition-all"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Application Progress
+                </Button>
+                {appSaved && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2 text-green-600 text-sm font-medium"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Progress saved! Your advisor will review your information.
+                  </motion.div>
+                )}
+                <p className="text-xs text-gray-400 text-center max-w-md">
+                  <AlertCircle className="w-3 h-3 inline mr-1" />
+                  All information is encrypted and stored securely. Your advisor will review any details you provide to expedite your application.
+                </p>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowRight, ArrowLeft, Check, Shield, Clock, Heart } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Shield, Clock, Heart, HelpCircle, Sparkles } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useFunnel } from '@/contexts/FunnelContext';
-import { COVERAGE_RANGES, QUICK_AMOUNTS, getAvailableTermLengths } from '@/lib/pricingEngine';
+import { COVERAGE_RANGES, QUICK_AMOUNTS, getAvailableTermLengths, recommendPolicy } from '@/lib/pricingEngine';
 import type { PolicyType } from '@/lib/pricingEngine';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * Estimate Page — Step-by-step funnel
@@ -14,7 +15,7 @@ import type { PolicyType } from '@/lib/pricingEngine';
  * 1. Age (slider)
  * 2. Gender (choice)
  * 3. Tobacco use (choice)
- * 4. Policy type (choice with descriptions)
+ * 4. Policy type (choice with descriptions + "Not Sure" auto-recommend)
  * 5. Term length (conditional — only for term life)
  * 6. Coverage amount (slider with dynamic ranges based on policy type)
  */
@@ -24,6 +25,7 @@ export default function Estimate() {
   const { data, updateData, setCurrentStep } = useFunnel();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [validationError, setValidationError] = useState('');
+  const [showRecommendation, setShowRecommendation] = useState(false);
 
   // Determine which steps to show based on policy type
   const steps = useMemo(() => {
@@ -75,6 +77,11 @@ export default function Estimate() {
     return QUICK_AMOUNTS[data.policyType as PolicyType] || QUICK_AMOUNTS.term;
   }, [data.policyType]);
 
+  // Smart recommendation based on age and tobacco
+  const recommendation = useMemo(() => {
+    return recommendPolicy(data.age, data.tobacco);
+  }, [data.age, data.tobacco]);
+
   function getCoverageSubtitle(policyType: PolicyType | ''): string {
     switch (policyType) {
       case 'term':
@@ -110,6 +117,17 @@ export default function Estimate() {
 
   const isAnswered = isStepAnswered();
 
+  function handleNotSure() {
+    setShowRecommendation(true);
+    // Apply the recommendation
+    updateData({
+      policyType: recommendation.policyType,
+      coverageAmount: recommendation.coverageAmount,
+      ...(recommendation.termLength ? { termLength: recommendation.termLength } : {}),
+    });
+    setValidationError('');
+  }
+
   function handleNext() {
     if (!isAnswered) {
       setValidationError('Please select an option to continue');
@@ -120,7 +138,11 @@ export default function Estimate() {
     if (step.id === 'policy') {
       const pType = data.policyType as PolicyType;
       const range = COVERAGE_RANGES[pType];
-      updateData({ coverageAmount: range.defaultVal });
+      // Only reset if not coming from recommendation (which already set coverage)
+      if (!showRecommendation) {
+        updateData({ coverageAmount: range.defaultVal });
+      }
+      setShowRecommendation(false);
 
       // Also ensure term length is valid
       if (pType === 'term') {
@@ -145,6 +167,7 @@ export default function Estimate() {
     if (currentStepIndex > 0) {
       setCurrentStepIndex(currentStepIndex - 1);
       setValidationError('');
+      setShowRecommendation(false);
     } else {
       setLocation('/');
     }
@@ -322,6 +345,7 @@ export default function Estimate() {
                   onClick={() => {
                     updateData({ policyType: opt.value });
                     setValidationError('');
+                    setShowRecommendation(false);
                   }}
                   className={`w-full text-left p-5 rounded-xl transition-all duration-300 border-2 ${
                     data.policyType === opt.value
@@ -361,6 +385,71 @@ export default function Estimate() {
                   </div>
                 </button>
               ))}
+
+              {/* ── NOT SURE BUTTON ── */}
+              <div className="pt-2">
+                <button
+                  onClick={handleNotSure}
+                  className="w-full text-left p-5 rounded-xl transition-all duration-300 border-2 border-dashed border-[#D4AF37]/60 bg-gradient-to-r from-[#FFF8E1] to-[#FFFDF5] hover:border-[#D4AF37] hover:shadow-md"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 rounded-lg bg-[#D4AF37]/15">
+                      <HelpCircle className="w-6 h-6 text-[#D4AF37]" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold text-lg mb-1 text-[#1B5E9E]">Not Sure? Let Us Help</div>
+                      <p className="text-sm text-gray-500">
+                        We'll recommend the best plan based on your age and health profile.
+                      </p>
+                    </div>
+                    <Sparkles className="w-5 h-5 text-[#D4AF37] flex-shrink-0 mt-1" />
+                  </div>
+                </button>
+              </div>
+
+              {/* ── RECOMMENDATION CARD ── */}
+              <AnimatePresence>
+                {showRecommendation && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    exit={{ opacity: 0, y: -10, height: 0 }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                  >
+                    <div className="bg-gradient-to-r from-[#1B5E9E] to-[#2B7BC4] rounded-xl p-5 text-white shadow-lg">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-5 h-5 text-[#D4AF37]" />
+                        <span className="font-bold text-sm text-[#D4AF37]">Our Recommendation for You</span>
+                      </div>
+                      <p className="text-sm text-blue-100 leading-relaxed mb-3">
+                        {recommendation.reasoning}
+                      </p>
+                      <div className="flex items-center gap-3 bg-white/15 rounded-lg p-3">
+                        <div className="text-center">
+                          <p className="text-xs text-blue-200">Selected Plan</p>
+                          <p className="font-bold text-[#D4AF37]">
+                            {recommendation.policyType === 'term'
+                              ? `${recommendation.termLength}-Year Term`
+                              : recommendation.policyType === 'whole'
+                              ? 'Whole Life'
+                              : 'Final Expense'}
+                          </p>
+                        </div>
+                        <div className="w-px h-8 bg-white/30" />
+                        <div className="text-center">
+                          <p className="text-xs text-blue-200">Suggested Coverage</p>
+                          <p className="font-bold text-white">
+                            ${recommendation.coverageAmount.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-blue-200 mt-3">
+                        You can adjust the coverage amount in the next step.
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
