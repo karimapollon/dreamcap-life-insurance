@@ -19,7 +19,7 @@ export interface QuoteInput {
   tobacco: boolean;
   coverageAmount: number;
   policyType: PolicyType;
-  healthRating: HealthRating;
+  healthRating?: HealthRating;
   term?: number; // Years for term life (10, 20, 30)
 }
 
@@ -105,7 +105,7 @@ function calculateMonthlyPremium(input: QuoteInput): number {
 
   // Apply multipliers
   const ageMultiplier = getAgeMultiplier(input.age);
-  const healthMultiplier = getHealthMultiplier(input.healthRating);
+  const healthMultiplier = getHealthMultiplier(input.healthRating || 'preferred');
   const tobaccoMultiplier = getTobaccoMultiplier(input.tobacco);
 
   // Calculate per $1,000 rate
@@ -128,7 +128,7 @@ function calculateMonthlyPremium(input: QuoteInput): number {
 function generateExplanation(input: QuoteInput, premium: number): string {
   const ageGroup = input.age < 40 ? 'younger' : input.age < 55 ? 'mid-age' : 'mature';
   const tobaccoNote = input.tobacco ? ' As a tobacco user, your rate includes a significant health adjustment. ' : '';
-  const healthNote = input.healthRating !== 'preferred' ? ` Your health rating (${input.healthRating}) is reflected in this estimate. ` : '';
+  const healthNote = (input.healthRating && input.healthRating !== 'preferred') ? ` Your health rating (${input.healthRating}) is reflected in this estimate. ` : '';
   
   let policyDesc = '';
   if (input.policyType === 'term') {

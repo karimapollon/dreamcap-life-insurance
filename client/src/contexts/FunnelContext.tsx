@@ -2,14 +2,14 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface FunnelData {
   age: number;
-  gender: 'male' | 'female';
+  gender: 'male' | 'female' | '';
   tobacco: boolean;
   coverageAmount: number;
-  policyType: 'term' | 'whole' | 'final';
-  healthRating: 'preferred-plus' | 'preferred' | 'standard' | 'substandard';
-  name?: string;
-  email?: string;
-  phone?: string;
+  policyType: 'term' | 'whole' | 'final' | '';
+  firstName: string;
+  email: string;
+  phone: string;
+  monthlyPremium: number;
 }
 
 interface FunnelContextType {
@@ -22,11 +22,14 @@ interface FunnelContextType {
 
 const defaultData: FunnelData = {
   age: 35,
-  gender: 'male',
+  gender: '',
   tobacco: false,
   coverageAmount: 250000,
-  policyType: 'term',
-  healthRating: 'preferred',
+  policyType: '',
+  firstName: '',
+  email: '',
+  phone: '',
+  monthlyPremium: 0,
 };
 
 const FunnelContext = createContext<FunnelContextType | undefined>(undefined);

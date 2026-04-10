@@ -8,6 +8,7 @@ import { FunnelProvider } from "./contexts/FunnelContext";
 import Landing from "./pages/Landing";
 import Estimate from "./pages/Estimate";
 import Results from "./pages/Results";
+import LeadCapture from "./pages/LeadCapture";
 import Conversion from "./pages/Conversion";
 
 
@@ -17,7 +18,8 @@ function Router() {
       <Route path={"/"} component={Landing} />
       <Route path={"/estimate"} component={Estimate} />
       <Route path={"/results"} component={Results} />
-      <Route path={"/convert"} component={Conversion} />
+      <Route path={"/lead-capture"} component={LeadCapture} />
+      <Route path={"/dashboard"} component={Conversion} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

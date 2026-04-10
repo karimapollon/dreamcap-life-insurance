@@ -1,235 +1,289 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
-import { ArrowRight, ArrowLeft, Info } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useFunnel } from '@/contexts/FunnelContext';
+
+const STEPS = [
+  {
+    id: 'age',
+    title: 'What\'s your age?',
+    subtitle: 'Great, this helps us find your lowest rate',
+    type: 'slider',
+    min: 18,
+    max: 85,
+    field: 'age',
+  },
+  {
+    id: 'gender',
+    title: 'What\'s your gender?',
+    subtitle: 'Helps us personalize your options',
+    type: 'choice',
+    options: [
+      { value: 'male', label: '👨 Male' },
+      { value: 'female', label: '👩 Female' },
+    ],
+    field: 'gender',
+  },
+  {
+    id: 'tobacco',
+    title: 'Do you use tobacco?',
+    subtitle: 'Nice — this can significantly reduce your cost',
+    type: 'choice',
+    options: [
+      { value: 'no', label: '✓ No' },
+      { value: 'yes', label: '✗ Yes' },
+    ],
+    field: 'tobacco',
+  },
+  {
+    id: 'coverage',
+    title: 'How much coverage do you need?',
+    subtitle: 'Protects your family\'s financial future',
+    type: 'choice',
+    options: [
+      { value: '100000', label: '$100,000' },
+      { value: '250000', label: '$250,000' },
+      { value: '500000', label: '$500,000' },
+      { value: '1000000', label: '$1,000,000' },
+    ],
+    field: 'coverageAmount',
+  },
+  {
+    id: 'policy',
+    title: 'What type of policy?',
+    subtitle: 'You\'re 60 seconds away from your personalized plan',
+    type: 'choice',
+    options: [
+      { value: 'term', label: '📅 Term (20-year)' },
+      { value: 'whole', label: '♾️ Whole Life' },
+      { value: 'final', label: '🛡️ Final Expense' },
+    ],
+    field: 'policyType',
+  },
+];
 
 export default function Estimate() {
   const [, setLocation] = useLocation();
   const { data, updateData, setCurrentStep } = useFunnel();
-  const [activeSection, setActiveSection] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [validationError, setValidationError] = useState('');
 
-  const handleNext = () => {
-    setCurrentStep(2);
-    setLocation('/results');
-  };
+  const step = STEPS[currentStepIndex];
+  const isAnswered = isStepAnswered();
+  const progressPercent = ((currentStepIndex + 1) / STEPS.length) * 100;
 
-  const handleBack = () => {
-    setLocation('/');
-  };
+  function isStepAnswered(): boolean {
+    const field = step.field as keyof typeof data;
+    const value = data[field];
+    
+    if (step.type === 'slider') {
+      return true;
+    }
+    
+    if (step.type === 'choice') {
+      if (field === 'gender') return (value as string) !== '';
+      if (field === 'tobacco') return typeof value === 'boolean';
+      if (field === 'coverageAmount') return (value as number) > 0;
+      if (field === 'policyType') return (value as string) !== '';
+    }
+    
+    return false;
+  }
 
-  const sections = [
-    { label: 'Age', icon: '👤' },
-    { label: 'Gender', icon: '👥' },
-    { label: 'Tobacco', icon: '🚭' },
-    { label: 'Coverage', icon: '🛡️' },
-    { label: 'Policy', icon: '📋' },
-  ];
+  function handleNext() {
+    if (!isAnswered) {
+      setValidationError('Please select an option to continue');
+      return;
+    }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+    if (currentStepIndex < STEPS.length - 1) {
+      setCurrentStepIndex(currentStepIndex + 1);
+      setValidationError('');
+    } else {
+      // All steps complete, go to lead capture
+      setCurrentStep(5);
+      setLocation('/lead-capture');
+    }
+  }
+
+  function handleBack() {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(currentStepIndex - 1);
+      setValidationError('');
+    } else {
+      setLocation('/');
+    }
+  }
+
+  function handleSliderChange(value: number) {
+    updateData({ age: value });
+    setValidationError('');
+  }
+
+  function handleChoice(value: string) {
+    const field = step.field as keyof typeof data;
+    
+    if (field === 'gender') {
+      updateData({ gender: value as 'male' | 'female' });
+    } else if (field === 'tobacco') {
+      updateData({ tobacco: value === 'yes' });
+    } else if (field === 'coverageAmount') {
+      updateData({ coverageAmount: parseInt(value) });
+    } else if (field === 'policyType') {
+      updateData({ policyType: value as 'term' | 'whole' | 'final' });
+    }
+    
+    setValidationError('');
+  }
+
+  const progressText = currentStepIndex === STEPS.length - 1 
+    ? 'Final step — see your results next'
+    : `Step ${currentStepIndex + 1} of ${STEPS.length}`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F5F7FA] to-white py-12 px-4">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#1B5E9E] via-[#2B7BC4] to-white py-12 px-4">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl text-display text-[#1B5E9E] mb-3">
-            Let's Get Your Estimate
-          </h1>
-          <p className="text-lg text-[#6B7280]">
-            Just a few quick details and you'll see your personalized quote.
-          </p>
+          <h1 className="text-3xl font-bold text-white mb-2">Let's Get Your Estimate</h1>
+          <p className="text-blue-100">Just a few quick details and you'll see your personalized quote.</p>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-10">
+        <div className="mb-8 bg-white/20 backdrop-blur-sm rounded-lg p-6">
           <div className="flex justify-between items-center mb-3">
-            <span className="text-sm font-semibold text-[#1A1F2E]">Step 1 of 3</span>
-            <span className="text-sm font-semibold text-[#6B7280]">{activeSection + 1} of {sections.length} questions</span>
+            <span className="text-sm font-semibold text-white">{progressText}</span>
+            <span className="text-sm text-blue-100">{currentStepIndex + 1} of {STEPS.length} questions</span>
           </div>
-          <div className="progress-bar">
-            <div className="progress-bar-fill" style={{ width: `${((activeSection + 1) / sections.length) * 100}%` }}></div>
+          <div className="w-full bg-white/30 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-[#D4AF37] to-[#F4C430] h-2 rounded-full transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
           </div>
         </div>
 
-        {/* Section Tabs */}
-        <div className="flex gap-2 mb-10 overflow-x-auto pb-2">
-          {sections.map((section, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveSection(idx)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
-                activeSection === idx
-                  ? 'bg-[#1B5E9E] text-white shadow-lg'
-                  : 'bg-white text-[#1B5E9E] border-2 border-[#1B5E9E] hover:bg-[#F5F7FA]'
+        {/* Step Indicator */}
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+          {STEPS.map((s, idx) => (
+            <div
+              key={s.id}
+              className={`flex-shrink-0 px-4 py-2 rounded-full font-medium text-sm transition-all ${
+                idx === currentStepIndex
+                  ? 'bg-[#D4AF37] text-[#1B5E9E]'
+                  : idx < currentStepIndex
+                  ? 'bg-green-400 text-white'
+                  : 'bg-white/30 text-white'
               }`}
             >
-              {section.icon} {section.label}
-            </button>
+              {idx < currentStepIndex ? (
+                <Check className="w-4 h-4 inline mr-1" />
+              ) : (
+                <span>{idx + 1}</span>
+              )}
+            </div>
           ))}
         </div>
 
-        {/* Content Card */}
-        <Card className="p-8 shadow-lg border-0 mb-8 bg-white">
-          {/* Age Section */}
-          {activeSection === 0 && (
-            <div className="animate-fade-in-scale">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl text-display text-[#1B5E9E] font-bold">What's your age?</h2>
-                  <p className="text-sm text-[#6B7280] mt-1">This helps us calculate your rate</p>
-                </div>
-                <span className="text-5xl text-display text-[#D4AF37] font-bold">{data.age}</span>
+        {/* Question Card */}
+        <Card className="p-8 mb-8 shadow-xl border-0 bg-white">
+          <div className="mb-8 animate-fade-in">
+            <h2 className="text-2xl font-bold text-[#1B5E9E] mb-2">{step.title}</h2>
+            <p className="text-gray-600">{step.subtitle}</p>
+          </div>
+
+          {/* Slider */}
+          {step.type === 'slider' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="text-center">
+                <div className="text-6xl font-bold text-[#D4AF37] mb-4">{data.age}</div>
               </div>
-              <Slider
-                value={[data.age]}
-                onValueChange={(value) => updateData({ age: value[0] })}
-                min={18}
-                max={85}
-                step={1}
-                className="w-full"
+              <input
+                type="range"
+                min={step.min}
+                max={step.max}
+                value={data.age}
+                onChange={(e) => handleSliderChange(parseInt(e.target.value))}
+                className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1B5E9E]"
               />
-              <div className="flex justify-between text-xs text-[#6B7280] mt-2">
-                <span>18</span>
-                <span>85</span>
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>{step.min}</span>
+                <span>{step.max}</span>
               </div>
             </div>
           )}
 
-          {/* Gender Section */}
-          {activeSection === 1 && (
-            <div className="animate-fade-in-scale">
-              <h2 className="text-2xl text-display text-[#1B5E9E] font-bold mb-2">What's your gender?</h2>
-              <p className="text-sm text-[#6B7280] mb-6">This affects your premium rate</p>
-              <div className="grid grid-cols-2 gap-4">
-                {(['male', 'female'] as const).map((gender) => (
+          {/* Choice Buttons */}
+          {step.type === 'choice' && step.options && (
+            <div className={`grid gap-4 animate-fade-in ${step.options.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              {step.options.map((option) => {
+                let isSelected = false;
+                
+                if (step.field === 'gender') {
+                  isSelected = data.gender === option.value;
+                } else if (step.field === 'tobacco') {
+                  isSelected = (option.value === 'yes' && data.tobacco) || (option.value === 'no' && !data.tobacco);
+                } else if (step.field === 'coverageAmount') {
+                  isSelected = data.coverageAmount === parseInt(option.value);
+                } else if (step.field === 'policyType') {
+                  isSelected = data.policyType === option.value;
+                }
+
+                return (
                   <button
-                    key={gender}
-                    onClick={() => updateData({ gender })}
-                    className={`p-6 rounded-lg font-semibold text-lg transition-all border-2 ${
-                      data.gender === gender
-                        ? 'bg-[#1B5E9E] text-white border-[#1B5E9E] shadow-lg'
-                        : 'bg-white text-[#1B5E9E] border-[#E5E7EB] hover:border-[#1B5E9E]'
+                    key={option.value}
+                    onClick={() => handleChoice(option.value)}
+                    className={`p-4 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 ${
+                      isSelected
+                        ? 'bg-[#1B5E9E] text-white shadow-lg scale-105 ring-2 ring-[#D4AF37]'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    {gender === 'male' ? '👨 Male' : '👩 Female'}
+                    {option.label}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
           )}
 
-          {/* Tobacco Section */}
-          {activeSection === 2 && (
-            <div className="animate-fade-in-scale">
-              <h2 className="text-2xl text-display text-[#1B5E9E] font-bold mb-2">Do you use tobacco?</h2>
-              <p className="text-sm text-[#6B7280] mb-6">This impacts your rate significantly</p>
-              <div className="grid grid-cols-2 gap-4">
-                {['no', 'yes'].map((tobacco) => (
-                  <button
-                    key={tobacco}
-                    onClick={() => updateData({ tobacco: tobacco === 'yes' })}
-                    className={`p-6 rounded-lg font-semibold text-lg transition-all border-2 ${
-                      data.tobacco === (tobacco === 'yes')
-                        ? 'bg-[#1B5E9E] text-white border-[#1B5E9E] shadow-lg'
-                        : 'bg-white text-[#1B5E9E] border-[#E5E7EB] hover:border-[#1B5E9E]'
-                    }`}
-                  >
-                    {tobacco === 'no' ? '✓ No' : '✗ Yes'}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Coverage Section */}
-          {activeSection === 3 && (
-            <div className="animate-fade-in-scale">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl text-display text-[#1B5E9E] font-bold">How much coverage?</h2>
-                  <p className="text-sm text-[#6B7280] mt-1">Choose your death benefit amount</p>
-                </div>
-                <span className="text-4xl text-display text-[#D4AF37] font-bold">{formatCurrency(data.coverageAmount)}</span>
-              </div>
-              <Slider
-                value={[data.coverageAmount]}
-                onValueChange={(value) => updateData({ coverageAmount: value[0] })}
-                min={25000}
-                max={1000000}
-                step={25000}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-[#6B7280] mt-2">
-                <span>$25K</span>
-                <span>$1M</span>
-              </div>
-            </div>
-          )}
-
-          {/* Policy Type Section */}
-          {activeSection === 4 && (
-            <div className="animate-fade-in-scale">
-              <h2 className="text-2xl text-display text-[#1B5E9E] font-bold mb-2">What type of policy?</h2>
-              <p className="text-sm text-[#6B7280] mb-6">Choose the coverage that fits your needs</p>
-              <div className="space-y-3">
-                {[
-                  { value: 'term' as const, label: 'Term Life', desc: 'Coverage for 20 years' },
-                  { value: 'whole' as const, label: 'Whole Life', desc: 'Lifetime coverage' },
-                  { value: 'final' as const, label: 'Final Expense', desc: 'Funeral & burial costs' },
-                ].map((policy) => (
-                  <button
-                    key={policy.value}
-                    onClick={() => updateData({ policyType: policy.value })}
-                    className={`w-full p-4 rounded-lg text-left font-semibold transition-all border-2 ${
-                      data.policyType === policy.value
-                        ? 'bg-[#1B5E9E] text-white border-[#1B5E9E] shadow-lg'
-                        : 'bg-white text-[#1B5E9E] border-[#E5E7EB] hover:border-[#1B5E9E]'
-                    }`}
-                  >
-                    <div className="font-bold">{policy.label}</div>
-                    <div className={`text-sm ${data.policyType === policy.value ? 'text-blue-100' : 'text-[#6B7280]'}`}>
-                      {policy.desc}
-                    </div>
-                  </button>
-                ))}
-              </div>
+          {/* Validation Error */}
+          {validationError && (
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
+              <p className="text-red-700 text-sm font-medium">⚠️ {validationError}</p>
             </div>
           )}
         </Card>
 
-        {/* Navigation Buttons */}
+        {/* Action Buttons */}
         <div className="flex gap-4">
           <Button
             onClick={handleBack}
             variant="outline"
-            className="flex-1 py-6 rounded-lg border-2 border-[#1B5E9E] text-[#1B5E9E] font-semibold hover:bg-[#F5F7FA]"
+            className="flex-1 border-2 border-white text-white hover:bg-white hover:text-[#1B5E9E] font-semibold"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
           <Button
             onClick={handleNext}
-            className="flex-1 bg-gradient-to-r from-[#1B5E9E] to-[#2B7BC4] hover:shadow-lg text-white font-semibold py-6 rounded-lg"
+            disabled={!isAnswered}
+            className={`flex-1 font-semibold transition-all ${
+              isAnswered
+                ? 'bg-gradient-to-r from-[#D4AF37] to-[#F4C430] text-[#1B5E9E] hover:shadow-lg hover:scale-105'
+                : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+            }`}
           >
-            <span>See My Estimate</span>
+            Next
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
 
-        {/* Microcopy */}
-        <p className="text-center text-sm text-[#6B7280] mt-6">
-          ✓ Your information is secure and private. No commitment required.
-        </p>
+        {/* Trust Badge */}
+        <div className="mt-8 text-center text-sm text-white/80">
+          <p>✓ Secure & Private • ✓ No Obligation • ✓ Takes 2 minutes</p>
+        </div>
       </div>
     </div>
   );
