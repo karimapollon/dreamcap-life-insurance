@@ -24,7 +24,7 @@ const defaultData: FunnelData = {
   age: 35,
   gender: '',
   tobacco: false,
-  coverageAmount: 250000,
+  coverageAmount: 10000,
   policyType: '',
   firstName: '',
   email: '',

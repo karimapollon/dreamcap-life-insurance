@@ -39,15 +39,12 @@ const STEPS = [
   },
   {
     id: 'coverage',
-    title: 'How much coverage do you need?',
-    subtitle: 'Protects your family\'s financial future',
-    type: 'choice',
-    options: [
-      { value: '100000', label: '$100,000' },
-      { value: '250000', label: '$250,000' },
-      { value: '500000', label: '$500,000' },
-      { value: '1000000', label: '$1,000,000' },
-    ],
+    title: 'How much coverage would you like?',
+    subtitle: 'Drag to choose the amount that protects your family',
+    type: 'coverage-slider',
+    min: 10000,
+    max: 2000000,
+    step: 5000,
     field: 'coverageAmount',
   },
   {
@@ -78,14 +75,13 @@ export default function Estimate() {
     const field = step.field as keyof typeof data;
     const value = data[field];
     
-    if (step.type === 'slider') {
+    if (step.type === 'slider' || step.type === 'coverage-slider') {
       return true;
     }
     
     if (step.type === 'choice') {
       if (field === 'gender') return (value as string) !== '';
       if (field === 'tobacco') return typeof value === 'boolean';
-      if (field === 'coverageAmount') return (value as number) > 0;
       if (field === 'policyType') return (value as string) !== '';
     }
     
@@ -120,6 +116,18 @@ export default function Estimate() {
   function handleSliderChange(value: number) {
     updateData({ age: value });
     setValidationError('');
+  }
+
+  function handleCoverageSliderChange(value: number) {
+    updateData({ coverageAmount: value });
+    setValidationError('');
+  }
+
+  function formatCurrency(amount: number): string {
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(amount % 1000000 === 0 ? 0 : 1)}M`;
+    }
+    return `$${(amount / 1000).toFixed(0)}K`;
   }
 
   function handleChoice(value: string) {
@@ -245,6 +253,52 @@ export default function Estimate() {
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {/* Coverage Slider */}
+          {step.type === 'coverage-slider' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="text-center">
+                <div className="text-5xl font-bold text-[#D4AF37] mb-1">
+                  ${data.coverageAmount.toLocaleString()}
+                </div>
+                <p className="text-sm text-gray-500 mt-2">in coverage protection</p>
+              </div>
+              
+              {/* Slider Track */}
+              <div className="relative px-1">
+                <input
+                  type="range"
+                  min={step.min}
+                  max={step.max}
+                  step={step.step}
+                  value={data.coverageAmount}
+                  onChange={(e) => handleCoverageSliderChange(parseInt(e.target.value))}
+                  className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1B5E9E]"
+                />
+                <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <span>{formatCurrency(step.min!)}</span>
+                  <span>{formatCurrency(step.max!)}</span>
+                </div>
+              </div>
+
+              {/* Quick Select Buttons */}
+              <div className="grid grid-cols-4 gap-2 mt-4">
+                {[50000, 100000, 250000, 500000].map((amount) => (
+                  <button
+                    key={amount}
+                    onClick={() => handleCoverageSliderChange(amount)}
+                    className={`py-2 px-1 rounded-lg text-xs font-semibold transition-all ${
+                      data.coverageAmount === amount
+                        ? 'bg-[#1B5E9E] text-white shadow-md'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {formatCurrency(amount)}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
