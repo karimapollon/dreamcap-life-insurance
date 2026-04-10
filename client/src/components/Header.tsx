@@ -10,7 +10,7 @@ const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663422524482/kJxKW
 export default function Header() {
   return (
     <header className="w-full py-4 px-6 bg-white shadow-sm z-50">
-      <div className="max-w-6xl mx-auto flex items-center">
+      <div className="max-w-6xl mx-auto flex items-center justify-center">
         <a href="/" className="inline-block">
           <img
             src={LOGO_URL}
