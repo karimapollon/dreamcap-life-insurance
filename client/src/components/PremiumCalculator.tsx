@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { calculateQuote, PolicyType, HealthRating } from '@/lib/pricingEngine';
+import { calculateQuote, PolicyType } from '@/lib/pricingEngine';
 import { Shield, TrendingUp } from 'lucide-react';
 
 interface CalculatorState {
@@ -13,7 +13,7 @@ interface CalculatorState {
   tobacco: boolean;
   coverageAmount: number;
   policyType: PolicyType;
-  healthRating: HealthRating;
+
   term: number;
 }
 
@@ -24,7 +24,7 @@ export default function PremiumCalculator() {
     tobacco: false,
     coverageAmount: 250000,
     policyType: 'term',
-    healthRating: 'preferred',
+
     term: 20,
   });
 
@@ -249,26 +249,7 @@ export default function PremiumCalculator() {
               </div>
             </div>
 
-            {/* Health Rating */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
-              <label className="text-sm font-semibold text-slate-700 block mb-4">Health Rating</label>
-              <Select
-                value={state.healthRating}
-                onValueChange={(value) => {
-                  setState((prev) => ({ ...prev, healthRating: value as HealthRating }));
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="preferred-plus">Preferred Plus (Best)</SelectItem>
-                  <SelectItem value="preferred">Preferred (Standard)</SelectItem>
-                  <SelectItem value="standard">Standard</SelectItem>
-                  <SelectItem value="substandard">Substandard</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
           </div>
 
           {/* Results Card - Sticky on Desktop */}
@@ -308,8 +289,8 @@ export default function PremiumCalculator() {
                     <span className="font-semibold">{state.age}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-blue-100">Health Rating:</span>
-                    <span className="font-semibold capitalize">{state.healthRating.replace('-', ' ')}</span>
+                    <span className="text-blue-100">Tobacco:</span>
+                    <span className="font-semibold">{state.tobacco ? 'Yes' : 'No'}</span>
                   </div>
                 </div>
 

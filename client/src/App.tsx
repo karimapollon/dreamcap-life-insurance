@@ -9,7 +9,8 @@ import Landing from "./pages/Landing";
 import Estimate from "./pages/Estimate";
 import Results from "./pages/Results";
 import LeadCapture from "./pages/LeadCapture";
-import Conversion from "./pages/Conversion";
+import Success from "./pages/Success";
+import Dashboard from "./pages/Dashboard";
 
 
 function Router() {
@@ -19,7 +20,8 @@ function Router() {
       <Route path={"/estimate"} component={Estimate} />
       <Route path={"/results"} component={Results} />
       <Route path={"/lead-capture"} component={LeadCapture} />
-      <Route path={"/dashboard"} component={Conversion} />
+      <Route path={"/success"} component={Success} />
+      <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -33,7 +35,6 @@ function App() {
       <FunnelProvider>
         <ThemeProvider
           defaultTheme="light"
-          // switchable
         >
           <TooltipProvider>
             <Toaster />

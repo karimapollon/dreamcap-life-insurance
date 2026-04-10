@@ -53,7 +53,7 @@ export default function LeadCapture() {
     setTimeout(() => {
       setIsSubmitting(false);
       setCurrentStep(6);
-      setLocation('/dashboard');
+      setLocation('/success');
     }, 1500);
   };
 
