@@ -11,6 +11,7 @@ export interface FunnelData {
   email: string;
   phone: string;
   monthlyPremium: number;
+  leadId: number | null; // Set after lead is saved to database
 }
 
 interface FunnelContextType {
@@ -32,6 +33,7 @@ const defaultData: FunnelData = {
   email: '',
   phone: '',
   monthlyPremium: 0,
+  leadId: null,
 };
 
 const FunnelContext = createContext<FunnelContextType | undefined>(undefined);

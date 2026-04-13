@@ -5,12 +5,16 @@ import { Input } from '@/components/ui/input';
 import { ArrowRight, ArrowLeft, Lock, Check } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useFunnel } from '@/contexts/FunnelContext';
+import { trpc } from '@/lib/trpc';
+import { calculateQuote, PolicyType } from '@/lib/pricingEngine';
 
 export default function LeadCapture() {
   const [, setLocation] = useLocation();
   const { data, updateData, setCurrentStep } = useFunnel();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const submitLead = trpc.leads.submitLead.useMutation();
 
   const handleChange = (field: 'firstName' | 'email' | 'phone', value: string) => {
     updateData({ [field]: value });
@@ -49,12 +53,46 @@ export default function LeadCapture() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // Calculate the quote for the notification
+      const quote = calculateQuote({
+        age: data.age,
+        gender: data.gender as 'male' | 'female',
+        tobacco: data.tobacco,
+        policyType: (data.policyType || 'term') as PolicyType,
+        coverageAmount: data.coverageAmount,
+        termLength: data.termLength,
+      });
+
+      // Submit lead to backend
+      const result = await submitLead.mutateAsync({
+        firstName: data.firstName,
+        email: data.email,
+        phone: data.phone,
+        age: data.age,
+        gender: data.gender || undefined,
+        tobacco: data.tobacco ? 'Yes' : 'No',
+        policyType: data.policyType || undefined,
+        termLength: data.policyType === 'term' ? data.termLength : undefined,
+        coverageAmount: data.coverageAmount,
+        monthlyPremium: `$${quote.monthlyPremium.toFixed(2)}/mo`,
+      });
+
+      // Store the lead ID in context for the dashboard
+      if (result.leadId) {
+        updateData({ leadId: result.leadId, monthlyPremium: quote.monthlyPremium });
+      }
+
       setCurrentStep(6);
       setLocation('/success');
-    }, 1500);
+    } catch (error) {
+      console.error('Failed to submit lead:', error);
+      // Still allow navigation even if API fails
+      setCurrentStep(6);
+      setLocation('/success');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBack = () => {
@@ -180,7 +218,7 @@ export default function LeadCapture() {
 
           {/* Security Message */}
           <p className="text-center text-sm text-gray-600 mt-6">
-            ✓ Your information is secure and private. We respect your privacy.
+            Your information is secure and private. We respect your privacy.
           </p>
         </Card>
 

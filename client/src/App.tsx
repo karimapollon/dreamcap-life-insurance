@@ -13,8 +13,8 @@ import LeadCapture from "./pages/LeadCapture";
 import Success from "./pages/Success";
 import Dashboard from "./pages/Dashboard";
 
-
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Layout>
       <Switch>

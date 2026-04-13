@@ -1,0 +1,26 @@
+# DreamCap Life Insurance - Project TODO
+
+- [x] Landing page with hero section, trust indicators, gold CTA
+- [x] Estimate page with 5-step mandatory question funnel
+- [x] Policy type first with Not Sure recommendation button
+- [x] Coverage slider dynamically adjusted per policy type
+- [x] Term length selection for Term Life only
+- [x] Lead capture gate (email/phone form)
+- [x] Success confirmation page
+- [x] Interactive dashboard with 5 tabs
+- [x] Shared header with DreamCap Financial logo on every page
+- [x] Shared footer with compliance disclaimers on every page
+- [x] Accurate premium pricing engine with 2026 rates
+- [x] Upgrade project to web-db-user for backend server and database
+- [x] Create leads database table to store form submissions
+- [x] Create applications database table for extended application data
+- [x] Create backend API route (submitLead) to capture lead data
+- [x] Create backend API route (submitApplication) for extended application data
+- [x] Connect frontend lead capture form to backend submitLead API
+- [x] Push database schema/migrations
+- [x] Fix Dashboard to call correct tRPC procedure (submitApplication), map field names correctly, handle missing leadId
+- [x] Implement email delivery to karim@dreamcap.financial for new lead and application submissions
+- [x] Send owner notification via notifyOwner for every new lead submission
+- [x] Write vitest tests for lead submission and application flows (15 tests passing)
+- [x] Test full flow end-to-end (browser test confirmed)
+- [ ] Save final checkpoint

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useFunnel } from '@/contexts/FunnelContext';
 import { calculateQuote } from '@/lib/pricingEngine';
+import { trpc } from '@/lib/trpc';
 import { motion } from 'framer-motion';
 
 function AnimatedNumber({ value, prefix = '', suffix = '', decimals = 0 }: {
@@ -45,6 +46,9 @@ export default function Dashboard() {
   const { data } = useFunnel();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [appSaved, setAppSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const submitApplication = trpc.leads.submitApplication.useMutation();
   const [appForm, setAppForm] = useState({
     fullName: data.firstName || '',
     dateOfBirth: '',
@@ -74,10 +78,61 @@ export default function Dashboard() {
     setAppSaved(false);
   }, []);
 
-  const handleSaveApplication = useCallback(() => {
-    setAppSaved(true);
-    setTimeout(() => setAppSaved(false), 3000);
-  }, []);
+  const [saveError, setSaveError] = useState(false);
+
+  const handleSaveApplication = useCallback(async () => {
+    setIsSaving(true);
+    setSaveError(false);
+
+    // If no leadId exists (user navigated directly to dashboard), we still try
+    // to submit — the backend will store the application with leadId 0 which
+    // can be reconciled later. The notification email still goes out.
+    const leadId = data.leadId ?? 0;
+
+    try {
+      await submitApplication.mutateAsync({
+        leadId,
+        // Pass lead context for the notification email
+        firstName: data.firstName || undefined,
+        email: data.email || undefined,
+        phone: data.phone || undefined,
+        policyType: data.policyType || undefined,
+        coverageAmount: data.coverageAmount || undefined,
+        monthlyPremium: data.monthlyPremium ? `$${data.monthlyPremium.toFixed(2)}/mo` : undefined,
+        termLength: data.policyType === 'term' ? data.termLength : undefined,
+        // Map form fields to backend schema field names
+        fullLegalName: appForm.fullName || undefined,
+        dateOfBirth: appForm.dateOfBirth || undefined,
+        ssn: appForm.ssn || undefined,
+        streetAddress: appForm.address || undefined,
+        city: appForm.city || undefined,
+        state: appForm.state || undefined,
+        zipCode: appForm.zip || undefined,
+        occupation: appForm.occupation || undefined,
+        annualIncome: appForm.annualIncome || undefined,
+        heightFt: appForm.heightFt ? parseInt(appForm.heightFt, 10) : undefined,
+        heightIn: appForm.heightIn ? parseInt(appForm.heightIn, 10) : undefined,
+        weight: appForm.weight ? parseInt(appForm.weight, 10) : undefined,
+        primaryBeneficiary: appForm.primaryBeneficiary || undefined,
+        beneficiaryRelationship: appForm.beneficiaryRelationship || undefined,
+        contingentBeneficiary: appForm.contingentBeneficiary || undefined,
+        medicalConditions: appForm.medicalConditions || undefined,
+        medications: appForm.medications || undefined,
+        familyHistory: appForm.familyHistory || undefined,
+        hospitalized: appForm.hasBeenHospitalized || undefined,
+        dui: appForm.hasDUI || undefined,
+        additionalNotes: appForm.additionalNotes || undefined,
+      });
+      setAppSaved(true);
+      setTimeout(() => setAppSaved(false), 4000);
+    } catch (error) {
+      console.error('Failed to save application:', error);
+      setSaveError(true);
+      setTimeout(() => setSaveError(false), 5000);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [data, appForm, submitApplication]);
 
   const termLen = data.termLength || 20;
 
@@ -881,10 +936,11 @@ export default function Dashboard() {
               <div className="flex flex-col items-center gap-3">
                 <Button
                   onClick={handleSaveApplication}
+                  disabled={isSaving}
                   className="w-full md:w-auto bg-gradient-to-r from-[#D4AF37] to-[#F4C430] text-[#1B5E9E] hover:shadow-lg font-bold py-4 px-8 rounded-xl text-base transition-all"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  Save Application Progress
+                  {isSaving ? 'Saving...' : 'Save Application Progress'}
                 </Button>
                 {appSaved && (
                   <motion.div
@@ -894,6 +950,16 @@ export default function Dashboard() {
                   >
                     <CheckCircle className="w-4 h-4" />
                     Progress saved! Your advisor will review your information.
+                  </motion.div>
+                )}
+                {saveError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2 text-red-600 text-sm font-medium"
+                  >
+                    <AlertCircle className="w-4 h-4" />
+                    Unable to save right now. Please try again in a moment.
                   </motion.div>
                 )}
                 <p className="text-xs text-gray-400 text-center max-w-md">
