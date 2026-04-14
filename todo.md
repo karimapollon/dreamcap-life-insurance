@@ -26,3 +26,7 @@
 - [x] Save final checkpoint
 - [x] Make phone button on Dashboard call 305-458-6043 when clicked
 - [x] Make booking button on Dashboard link to https://www.dreamcap.financial/book-session
+- [x] Include actual SSN (not encrypted placeholder) in notification emails
+- [x] Redesign lead notification email with professional HTML layout (organized sections, easy to read)
+- [x] Redesign application notification email with professional HTML layout (organized sections, easy to read)
+- [x] Include ALL form fields in notification emails for policy completion

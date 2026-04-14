@@ -2,7 +2,14 @@ import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { createLead, createApplication } from "../db";
 import { notifyOwner } from "../_core/notification";
-import { sendLeadEmail } from "../email";
+import {
+  sendLeadNotificationEmail,
+  sendApplicationNotificationEmail,
+  buildLeadPlainText,
+  buildApplicationPlainText,
+  type LeadEmailData,
+  type ApplicationEmailData,
+} from "../email";
 
 /**
  * Helper to format policy type label for display
@@ -48,59 +55,44 @@ export const leadsRouter = router({
         monthlyPremium: input.monthlyPremium ?? null,
       });
 
-      const policyLabel = formatPolicyLabel(input.policyType, input.termLength);
-      const coverageFormatted = input.coverageAmount
-        ? `$${input.coverageAmount.toLocaleString()}`
-        : "Not specified";
+      // Build structured email data
+      const emailData: LeadEmailData = {
+        firstName: input.firstName,
+        email: input.email,
+        phone: input.phone,
+        age: input.age,
+        gender: input.gender,
+        tobacco: input.tobacco,
+        policyType: input.policyType,
+        termLength: input.termLength,
+        coverageAmount: input.coverageAmount,
+        monthlyPremium: input.monthlyPremium,
+        leadId,
+      };
 
       const emailSubject = `New Lead: ${input.firstName} — ${input.email}`;
-      const emailContent = `
-NEW LEAD SUBMITTED — DreamCap Financial
+      const plainText = buildLeadPlainText(emailData);
 
-Contact Information:
-• Name: ${input.firstName}
-• Email: ${input.email}
-• Phone: ${input.phone}
-
-Quote Details:
-• Age: ${input.age || "Not specified"}
-• Gender: ${input.gender || "Not specified"}
-• Tobacco Use: ${input.tobacco || "No"}
-• Policy Type: ${policyLabel}
-• Coverage Amount: ${coverageFormatted}
-• Estimated Monthly Premium: ${input.monthlyPremium || "Not calculated"}
-
-Lead ID: ${leadId || "N/A"}
-Submitted: ${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })} EST
-
----
-This lead was submitted through the DreamCap Financial life insurance quote funnel.
-Please follow up within 24 hours.
-      `.trim();
-
-      // Send notifications in parallel (don't block on either)
+      // Send notifications in parallel (don't block response)
       const notificationPromises: Promise<unknown>[] = [];
 
-      // 1. Send via Manus owner notification (built-in email + in-app)
+      // 1. Owner notification (built-in Manus notification — plain text)
       notificationPromises.push(
-        notifyOwner({ title: emailSubject, content: emailContent }).catch((error) => {
+        notifyOwner({ title: emailSubject, content: plainText }).catch((error) => {
           console.error("[Leads] Failed to send owner notification:", error);
         })
       );
 
-      // 2. Send direct email to karim@dreamcap.financial via SMTP
+      // 2. Direct email with professional HTML template
       notificationPromises.push(
-        sendLeadEmail(emailSubject, emailContent).catch((error) => {
+        sendLeadNotificationEmail(emailData).catch((error) => {
           console.error("[Leads] Failed to send direct email:", error);
         })
       );
 
-      // Fire and forget — don't block the lead submission response
       Promise.allSettled(notificationPromises).then((results) => {
-        const ownerResult = results[0];
-        const emailResult = results[1];
         console.log(
-          `[Leads] Notification results — Owner: ${ownerResult.status}, Email: ${emailResult.status}`
+          `[Leads] Notification results — Owner: ${results[0].status}, Email: ${results[1].status}`
         );
       });
 
@@ -176,82 +168,57 @@ Please follow up within 24 hours.
         additionalNotes: input.additionalNotes ?? null,
       });
 
-      // Build detailed notification for extended application
-      const policyLabel = formatPolicyLabel(input.policyType, input.termLength);
+      // Build structured email data with ALL fields including actual SSN
+      const emailData: ApplicationEmailData = {
+        leadId: input.leadId,
+        firstName: input.firstName,
+        email: input.email,
+        phone: input.phone,
+        policyType: input.policyType,
+        coverageAmount: input.coverageAmount,
+        monthlyPremium: input.monthlyPremium,
+        termLength: input.termLength,
+        fullLegalName: input.fullLegalName,
+        dateOfBirth: input.dateOfBirth,
+        ssn: input.ssn,  // Actual SSN included — not masked
+        occupation: input.occupation,
+        annualIncome: input.annualIncome,
+        streetAddress: input.streetAddress,
+        city: input.city,
+        state: input.state,
+        zipCode: input.zipCode,
+        heightFt: input.heightFt,
+        heightIn: input.heightIn,
+        weight: input.weight,
+        medicalConditions: input.medicalConditions,
+        medications: input.medications,
+        familyHistory: input.familyHistory,
+        hospitalized: input.hospitalized,
+        dui: input.dui,
+        primaryBeneficiary: input.primaryBeneficiary,
+        beneficiaryRelationship: input.beneficiaryRelationship,
+        contingentBeneficiary: input.contingentBeneficiary,
+        additionalNotes: input.additionalNotes,
+        applicationId: appId,
+      };
 
-      const sections: string[] = [
-        `EXTENDED APPLICATION SUBMITTED — DreamCap Financial`,
-        ``,
-        `Lead Information:`,
-        `• Name: ${input.firstName || input.fullLegalName || "N/A"}`,
-        `• Email: ${input.email || "N/A"}`,
-        `• Phone: ${input.phone || "N/A"}`,
-        `• Policy: ${policyLabel}`,
-        `• Coverage: ${input.coverageAmount ? `$${input.coverageAmount.toLocaleString()}` : "N/A"}`,
-        `• Est. Premium: ${input.monthlyPremium || "N/A"}`,
-      ];
-
-      if (input.fullLegalName || input.dateOfBirth || input.occupation || input.annualIncome) {
-        sections.push(``, `Personal Information:`);
-        if (input.fullLegalName) sections.push(`• Legal Name: ${input.fullLegalName}`);
-        if (input.dateOfBirth) sections.push(`• Date of Birth: ${input.dateOfBirth}`);
-        if (input.ssn) sections.push(`• SSN: Provided (encrypted)`);
-        if (input.occupation) sections.push(`• Occupation: ${input.occupation}`);
-        if (input.annualIncome) sections.push(`• Annual Income: ${input.annualIncome}`);
-      }
-
-      if (input.streetAddress || input.city || input.state) {
-        sections.push(``, `Address:`);
-        const addr = [input.streetAddress, input.city, input.state, input.zipCode].filter(Boolean).join(", ");
-        sections.push(`• ${addr}`);
-      }
-
-      if (input.heightFt || input.weight || input.medicalConditions || input.medications) {
-        sections.push(``, `Health Information:`);
-        if (input.heightFt) sections.push(`• Height: ${input.heightFt}'${input.heightIn || 0}"`);
-        if (input.weight) sections.push(`• Weight: ${input.weight} lbs`);
-        if (input.medicalConditions && input.medicalConditions !== "None") sections.push(`• Medical Conditions: ${input.medicalConditions}`);
-        if (input.medications && input.medications !== "None") sections.push(`• Medications: ${input.medications}`);
-        if (input.familyHistory && input.familyHistory !== "None") sections.push(`• Family History: ${input.familyHistory}`);
-        if (input.hospitalized) sections.push(`• Hospitalized (5yr): ${input.hospitalized}`);
-        if (input.dui) sections.push(`• DUI/DWI (5yr): ${input.dui}`);
-      }
-
-      if (input.primaryBeneficiary) {
-        sections.push(``, `Beneficiary Information:`);
-        sections.push(`• Primary: ${input.primaryBeneficiary} (${input.beneficiaryRelationship || "N/A"})`);
-        if (input.contingentBeneficiary) sections.push(`• Contingent: ${input.contingentBeneficiary}`);
-      }
-
-      if (input.additionalNotes) {
-        sections.push(``, `Additional Notes:`, input.additionalNotes);
-      }
-
-      sections.push(
-        ``,
-        `Application ID: ${appId || "N/A"}`,
-        `Lead ID: ${input.leadId}`,
-        `Submitted: ${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })} EST`,
-        ``,
-        `---`,
-        `This extended application was submitted through the DreamCap Financial dashboard.`,
-        `Please review and follow up with the client.`
-      );
-
-      const emailSubject = `Extended Application: ${input.firstName || input.fullLegalName || "Client"} — ${input.email || "No email"}`;
-      const emailBody = sections.join("\n");
+      const name = input.fullLegalName || input.firstName || "Client";
+      const emailSubject = `Full Application: ${name} — ${input.email || "No email"}`;
+      const plainText = buildApplicationPlainText(emailData);
 
       // Send notifications in parallel
       const notificationPromises: Promise<unknown>[] = [];
 
+      // 1. Owner notification (plain text for Manus notification system)
       notificationPromises.push(
-        notifyOwner({ title: emailSubject, content: emailBody }).catch((error) => {
+        notifyOwner({ title: emailSubject, content: plainText }).catch((error) => {
           console.error("[Leads] Failed to send application notification:", error);
         })
       );
 
+      // 2. Direct email with professional HTML template
       notificationPromises.push(
-        sendLeadEmail(emailSubject, emailBody).catch((error) => {
+        sendApplicationNotificationEmail(emailData).catch((error) => {
           console.error("[Leads] Failed to send application email:", error);
         })
       );

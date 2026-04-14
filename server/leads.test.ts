@@ -16,9 +16,12 @@ vi.mock("./_core/notification", () => ({
   notifyOwner: vi.fn().mockResolvedValue(true),
 }));
 
-// Mock the email function
+// Mock the email functions (new structured API)
 vi.mock("./email", () => ({
-  sendLeadEmail: vi.fn().mockResolvedValue(true),
+  sendLeadNotificationEmail: vi.fn().mockResolvedValue(true),
+  sendApplicationNotificationEmail: vi.fn().mockResolvedValue(true),
+  buildLeadPlainText: vi.fn().mockReturnValue("Lead plain text"),
+  buildApplicationPlainText: vi.fn().mockReturnValue("Application plain text"),
 }));
 
 function createPublicContext(): TrpcContext {
@@ -159,19 +162,18 @@ describe("leads.submitLead", () => {
       coverageAmount: 500000,
     });
 
-    // Wait for the async notification promises to settle
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(notifyOwner).toHaveBeenCalledWith(
       expect.objectContaining({
         title: expect.stringContaining("Bob"),
-        content: expect.stringContaining("bob@example.com"),
+        content: expect.any(String),
       })
     );
   });
 
-  it("calls sendLeadEmail for direct email delivery", async () => {
-    const { sendLeadEmail } = await import("./email");
+  it("calls sendLeadNotificationEmail with structured data", async () => {
+    const { sendLeadNotificationEmail } = await import("./email");
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);
 
@@ -179,14 +181,27 @@ describe("leads.submitLead", () => {
       firstName: "Carol",
       email: "carol@example.com",
       phone: "555-8888",
+      age: 28,
+      gender: "female",
+      policyType: "term",
+      termLength: 20,
+      coverageAmount: 300000,
+      monthlyPremium: "$22.50/mo",
     });
 
-    // Wait for the async notification promises to settle
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(sendLeadEmail).toHaveBeenCalledWith(
-      expect.stringContaining("Carol"),
-      expect.stringContaining("carol@example.com")
+    expect(sendLeadNotificationEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        firstName: "Carol",
+        email: "carol@example.com",
+        phone: "555-8888",
+        age: 28,
+        gender: "female",
+        policyType: "term",
+        coverageAmount: 300000,
+        leadId: 42,
+      })
     );
   });
 });
@@ -280,9 +295,8 @@ describe("leads.submitApplication", () => {
     );
   });
 
-  it("sends notification and email for extended application", async () => {
-    const { notifyOwner } = await import("./_core/notification");
-    const { sendLeadEmail } = await import("./email");
+  it("sends application notification email with SSN included", async () => {
+    const { sendApplicationNotificationEmail } = await import("./email");
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);
 
@@ -294,21 +308,50 @@ describe("leads.submitApplication", () => {
       policyType: "whole",
       coverageAmount: 100000,
       fullLegalName: "David Smith",
+      ssn: "123-45-6789",
+      occupation: "Teacher",
+      annualIncome: "$65,000",
     });
 
-    // Wait for the async notification promises to settle
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(sendApplicationNotificationEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        leadId: 42,
+        firstName: "Dave",
+        email: "dave@example.com",
+        fullLegalName: "David Smith",
+        ssn: "123-45-6789",
+        occupation: "Teacher",
+        annualIncome: "$65,000",
+        applicationId: 101,
+      })
+    );
+  });
+
+  it("sends owner notification with application details", async () => {
+    const { notifyOwner } = await import("./_core/notification");
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await caller.leads.submitApplication({
+      leadId: 42,
+      firstName: "Eve",
+      email: "eve@example.com",
+      phone: "555-6666",
+      policyType: "term",
+      termLength: 30,
+      coverageAmount: 500000,
+      fullLegalName: "Eve Johnson",
+    });
+
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(notifyOwner).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: expect.stringContaining("Dave"),
-        content: expect.stringContaining("dave@example.com"),
+        title: expect.stringContaining("Eve"),
+        content: expect.any(String),
       })
-    );
-
-    expect(sendLeadEmail).toHaveBeenCalledWith(
-      expect.stringContaining("Dave"),
-      expect.stringContaining("dave@example.com")
     );
   });
 
@@ -322,7 +365,7 @@ describe("leads.submitApplication", () => {
   });
 
   it("handles final expense policy type label correctly", async () => {
-    const { notifyOwner } = await import("./_core/notification");
+    const { sendLeadNotificationEmail } = await import("./email");
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);
 
@@ -336,9 +379,11 @@ describe("leads.submitApplication", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(notifyOwner).toHaveBeenCalledWith(
+    expect(sendLeadNotificationEmail).toHaveBeenCalledWith(
       expect.objectContaining({
-        content: expect.stringContaining("Final Expense"),
+        policyType: "final",
+        firstName: "Elder",
+        coverageAmount: 15000,
       })
     );
   });
