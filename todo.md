@@ -23,4 +23,6 @@
 - [x] Send owner notification via notifyOwner for every new lead submission
 - [x] Write vitest tests for lead submission and application flows (15 tests passing)
 - [x] Test full flow end-to-end (browser test confirmed)
-- [ ] Save final checkpoint
+- [x] Save final checkpoint
+- [x] Make phone button on Dashboard call 305-458-6043 when clicked
+- [x] Make booking button on Dashboard link to https://www.dreamcap.financial/book-session

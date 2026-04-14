@@ -988,6 +988,7 @@ export default function Dashboard() {
             <div className="flex gap-3 w-full md:w-auto">
               <Button
                 className="flex-1 md:flex-none bg-gradient-to-r from-[#D4AF37] to-[#F4C430] text-[#1B5E9E] hover:shadow-lg font-bold py-4 px-6 rounded-xl text-base transition-all"
+                onClick={() => window.location.href = 'tel:3054586043'}
               >
                 <Phone className="w-4 h-4 mr-2" />
                 Call Now
@@ -995,6 +996,7 @@ export default function Dashboard() {
               <Button
                 variant="outline"
                 className="flex-1 md:flex-none border-2 border-[#1B5E9E] text-[#1B5E9E] hover:bg-[#1B5E9E] hover:text-white font-bold py-4 px-6 rounded-xl text-base transition-all"
+                onClick={() => window.open('https://www.dreamcap.financial/book-session', '_blank')}
               >
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedule Review
